@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{margin:0;padding:0;background:#f2f1ec;font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;color:#2b2926;-webkit-font-smoothing:antialiased}
+a{color:#1f6e43}a:hover{color:#154f31}
+button,input,select{font-family:inherit}
+.sticky-head th{position:sticky;top:0;z-index:6}
+.sticky-cat th{position:sticky;top:0;z-index:7}
+.sticky-col th{position:sticky;top:26px;z-index:6}
+.tbl-scroll{overflow:auto;max-height:calc(100vh - 220px)}
+.fxh{position:sticky}
+.sticky-cat th.fxh,.sticky-col th.fxh{z-index:9}
+td.fxb{position:sticky;z-index:5}
+.k1{left:0}.k2{left:36px}.k3{left:94px}.k4{left:239px}.k5{left:302px}.k6{left:377px}
+.kedge{box-shadow:inset -1px 0 0 #ddd9d0, 3px 0 4px -2px rgba(0,0,0,.14)}
+.w1{width:36px;min-width:36px;max-width:36px}
+.w2{width:58px;min-width:58px;max-width:58px}
+.w3{width:145px;min-width:145px;max-width:145px}
+.w4{width:63px;min-width:63px;max-width:63px}
+.w5{width:75px;min-width:75px;max-width:75px}
+.w6{width:52px;min-width:52px;max-width:52px}
+.hc-lbl{position:sticky;left:0;z-index:3;background:#faf9f6}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+  
+  <sc-if value="{{ masterMenuOpen }}" hint-placeholder-val="{{ false }}"><div onClick="{{ onNavMasterToggle }}" style="position:fixed;inset:0;z-index:55"></div></sc-if>
+
+  <div data-screen-label="ナビゲーション" style="background:#1e6a41;color:#fff;display:flex;align-items:center;gap:14px;padding:0 14px;height:48px;position:sticky;top:0;z-index:60">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;white-space:nowrap"><span style="width:13px;height:13px;border-radius:50%;background:#15130f;border:2px solid #fff;display:inline-block"></span>黒丸表作成</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:rgba(255,255,255,.7)">小売店</span>
+      <select value="{{ retailerSel }}" onChange="{{ onRetailerSel }}" style="font-size:12.5px;padding:4px 8px;border:1px solid rgba(255,255,255,.4);border-radius:4px;background:#fff;color:#1e5232;font-weight:600">
+        <sc-for list="{{ retailerOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+      </select>
+    </div>
+    <div style="width:1px;height:22px;background:rgba(255,255,255,.25)"></div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button onClick="{{ onNavSheet }}" style="{{ navSheetStyle }}">黒丸表</button>
+      <button onClick="{{ onNavShipList }}" style="{{ navShipListStyle }}">発送リスト</button>
+      <div style="position:relative">
+        <button onClick="{{ onNavMasterToggle }}" style="{{ navMasterStyle }}">マスタ ▾</button>
+        <sc-if value="{{ masterMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopProp }}" style="position:absolute;top:36px;right:0;background:#fff;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:6px;min-width:150px;z-index:80">
+            <button onClick="{{ onGotoMRetailers }}" style="{{ masterItemStyle1 }}">小売店マスタ</button>
+            <button onClick="{{ onGotoMStores }}" style="{{ masterItemStyle2 }}">店舗マスタ</button>
+            <button onClick="{{ onGotoMProducts }}" style="{{ masterItemStyle3 }}">商品マスタ</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 黒丸表 ============ -->
+  <sc-if value="{{ vSheet }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="黒丸表" style="padding:16px 20px 56px;max-width:1240px">
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="font-size:12px;color:#888">黒丸表</span>
+        <select value="{{ sheetSel }}" onChange="{{ onSheetSel }}" style="font-size:13px;font-weight:600;padding:7px 10px;border:1px solid #c9c5bc;border-radius:6px;background:#fff;color:#1e5232;max-width:340px">
+          <sc-for list="{{ sheetOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+        </select>
+        <span style="font-size:11.5px;color:#bbb">{{ sheetCountLabel }}</span>
+        <div style="flex:1"></div>
+        <button onClick="{{ onNewSheet }}" style="padding:7px 14px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;font-size:12px;cursor:pointer;border-radius:6px;font-weight:600">＋ 新規作成</button>
+        <button onClick="{{ onDupSheet }}" style="padding:7px 14px;border:1px solid #c9c5bc;background:#fff;color:#555;font-size:12px;cursor:pointer;border-radius:6px">この表を複製</button>
+        <button onClick="{{ onSaveTemplate }}" style="padding:7px 14px;border:1px solid #c9c5bc;background:#fff;color:#555;font-size:12px;cursor:pointer;border-radius:6px">テンプレート保存</button>
+        <button onClick="{{ onDelSheet }}" style="padding:7px 12px;border:1px solid #e0cccc;background:#fff;color:#a05050;font-size:12px;cursor:pointer;border-radius:6px">削除</button>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="font-size:12px;color:#888">この表の設定:</span>
+        <button onClick="{{ onOpenProducts }}" style="padding:6px 14px;border:1px solid #c9c5bc;background:#fff;color:#333;border-radius:4px;font-size:12.5px;cursor:pointer">1. 商品を選ぶ</button>
+        <button onClick="{{ onOpenShelf }}" style="{{ shelfBtnStyle }}">2. 棚割り</button>
+        <button onClick="{{ onOpenDelivery }}" style="padding:6px 14px;border:1px solid #c9c5bc;background:#fff;color:#333;border-radius:4px;font-size:12.5px;cursor:pointer">3. 配送情報</button>
+        <button onClick="{{ onGoShipList }}" style="padding:6px 14px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">発送リスト作成</button>
+        <span style="font-size:11.5px;color:#999;margin-left:6px">{{ summaryLine }} ・ 単位を変えると●は自動再計算（自動保存）</span>
+      </div>
+
+      <sc-if value="{{ noCats }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #b0aca2;border-radius:6px;padding:32px;text-align:center;color:#666;font-size:13px">
+          まだ商品が選ばれていません。<br>
+          <button onClick="{{ onOpenProducts }}" style="margin-top:14px;padding:8px 20px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:13px;cursor:pointer;font-weight:600">商品を選ぶ</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasCats }}" hint-placeholder-val="{{ true }}">
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;margin-bottom:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #eceae3">
+            <span style="font-size:13px;font-weight:700;color:#1e5232">商品ヘッダー</span>
+            <span style="font-size:11.5px;color:#999">{{ headerSummary }}</span>
+            <span style="font-size:12px;font-weight:700;color:#1e5232;background:#eef3ec;border:1px solid #d4e3d4;border-radius:4px;padding:2px 10px">送付合計 {{ grandTotal }}</span>
+            <button onClick="{{ onToggleHeaderDetail }}" style="margin-left:auto;border:none;background:transparent;color:#1f6e43;font-size:11.5px;cursor:pointer;text-decoration:underline">{{ headerDetailLabel }}</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="border-collapse:collapse;font-size:12px;width:100%">
+              <thead>
+                <tr>
+                  <th class="hc-lbl kedge" style="border-bottom:1px solid #eceae3;background:#faf9f6;padding:5px 14px;width:90px;z-index:4"></th>
+                  <sc-for list="{{ colCats }}" as="cc" hint-placeholder-count="1"><th colSpan="{{ cc.n }}" style="border-bottom:1px solid #eceae3;border-left:2px solid #cfcabd;background:#f4f7f3;padding:5px;font-size:12px;color:#1e5232;font-weight:700">{{ cc.name }}</th></sc-for>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">商品</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;white-space:nowrap;font-weight:600;min-width:40px"><sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ false }}">{{ c.thumbEl }}</sc-if>{{ c.no }}<br>{{ c.name }}</td></sc-for></tr>
+                <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">送付店舗</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-weight:700;color:#1e5232">{{ c.cnt }}</td></sc-for></tr>
+                <tr><td class="hc-lbl kedge" style="padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; background: #faf9f6; font-weight: 700">店舗着</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-size:11px">{{ c.arrival }}</td></sc-for></tr>
+              </tbody>
+              <sc-if value="{{ headerDetailOpen }}" hint-placeholder-val="{{ false }}">
+                <tbody style="border-top:1px solid #eceae3">
+                  <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">CD</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-family:ui-monospace,Consolas,monospace;font-size:11px">{{ c.cd }}</td></sc-for></tr>
+                  <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">JAN</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-family:ui-monospace,Consolas,monospace;font-size:11px">{{ c.jan }}</td></sc-for></tr>
+                  <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">入稿期限</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-size:11px">{{ c.deadline }}</td></sc-for></tr>
+                  <tr><td class="hc-lbl kedge" style="border-bottom: 1px solid #f0eee8; padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; font-weight: 700">ラウンダー</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-size:11px">{{ c.rounder }}</td></sc-for></tr>
+                  <tr><td class="hc-lbl kedge" style="padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; background: #faf9f6; font-weight: 700">帯 / 同梱</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-size:11px">{{ c.band }}</td></sc-for></tr>
+                  <tr><td class="hc-lbl kedge" style="padding: 5px 14px; color: #777777; font-size: 11px; white-space: nowrap; background: #faf9f6; font-weight: 700">備考</td><sc-for list="{{ headerProds }}" as="c" hint-placeholder-count="5"><td style="border-left:{{ c.bl }};padding:5px 8px;text-align:center;font-size:11px;color:#555">{{ c.note }}</td></sc-for></tr>
+                </tbody>
+              </sc-if>
+            </table>
+          </div>
+          <sc-if value="{{ headerDetailOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:24px;align-items:flex-start;padding:12px 14px;border-top:1px solid #eceae3;flex-wrap:wrap">
+              <sc-for list="{{ catShelf }}" as="cs" hint-placeholder-count="1">
+                <div style="min-width:240px">
+                  <div style="font-size:11.5px;color:#555;margin-bottom:6px"><span style="font-weight:700;color:#1e5232">{{ cs.name }}</span> 棚割りルール</div>
+                  <sc-for list="{{ cs.ruleLines }}" as="rl" hint-placeholder-count="2"><div style="font-size:11.5px;color:#555;margin:2px 0">{{ rl.t }}</div></sc-for>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+                    <sc-for list="{{ cs.images }}" as="im" hint-placeholder-count="2">
+                      <div style="font-size:10.5px;color:#888">
+                        <div style="margin-bottom:3px">{{ im.label }}</div>
+                        <sc-if value="{{ im.has }}" hint-placeholder-val="{{ false }}">{{ im.imgEl }}</sc-if>
+                        <sc-if value="{{ im.ph }}" hint-placeholder-val="{{ false }}"><div style="height:56px;width:200px;border:1px solid #e0ddd5;background:repeating-linear-gradient(45deg,#f5f4ef,#f5f4ef 6px,#ebe9e1 6px,#ebe9e1 12px);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Consolas,monospace;font-size:10px;color:#999;cursor:pointer;text-align:center" onClick="{{ im.onEmpty }}">見本写真 未登録<br>（クリックでアップロード）</div></sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasCats }}" hint-placeholder-val="{{ true }}">
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;overflow:hidden">
+          <div class="tbl-scroll">
+            <table style="border-collapse:collapse;font-size:12.5px;width:100%">
+              <thead>
+                <tr class="sticky-cat">
+                  <th colSpan="{{ storeColSpanFull }}" class="fxh k1" style="border-bottom: 1px solid #ddd9d0; padding: 6px 14px; font-size: 11px; text-align: left; color: #999; font-weight: 600; left: 0; background-color: #FAF9F6">店舗</th>                  <th class="fxh k6 w6 kedge" style="border-bottom: 1px solid #ddd9d0; padding: 6px; font-size: 11px; color: #1e5232; font-weight: 700; text-align: center; white-space: nowrap; left: 377px; background-color: #FAF9F6"><br></th>
+                  <sc-for list="{{ colCats }}" as="cc" hint-placeholder-count="1"><th colSpan="{{ cc.n }}" style="border-bottom:1px solid #ddd9d0;border-left:2px solid #cfcabd;background:#f4f7f3;padding:6px;font-size:11px;color:#1e5232">{{ cc.name }}</th></sc-for>
+                </tr>
+                <tr class="sticky-col">
+                  <th class="fxh k1 w1" style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 6px;font-size:11px;color:#777;text-align:center">対象</th>
+                  <th class="fxh k2 w2" style="border-bottom: 1px solid #ddd9d0; padding: 5px 14px; font-size: 11px; color: #777; text-align: left; white-space: nowrap; background-color: #FAF9F6">店番</th>
+                  <th class="fxh k3 w3" style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777;text-align:left;white-space:nowrap">店舗名称</th>
+                  <sc-if value="{{ hasUnitCol }}" hint-placeholder-val="{{ true }}"><th class="fxh k4 w4" style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777;white-space:nowrap">単位</th></sc-if>
+                  <th class="fxh k5 w5" style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777;white-space:nowrap">展開本数</th>
+                  <th class="fxh k6 w6 kedge" style="border-bottom: 1px solid #ddd9d0; padding: 5px 6px; font-size: 11px; color: #777; text-align: center; left: 377px; background-color: #FAF9F6">合計</th>
+                  <sc-for list="{{ colProds }}" as="cp" hint-placeholder-count="5"><th title="{{ cp.name }}" style="border-bottom:1px solid #ddd9d0;border-left:{{ cp.bl }};background:{{ cp.bg }};padding:5px 4px;font-size:12.5px;min-width:36px;color:#555">{{ cp.no }}</th></sc-for>
+                  </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ gridRows }}" as="r" hint-placeholder-count="10">
+                  <tr style="{{ r.style }}">
+                    <td class="fxb k1 w1" style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center;background:{{ r.fixBg }}"><input type="checkbox" checked="{{ r.visChecked }}" onChange="{{ r.onToggleHide }}" title="発送対象" style="cursor:pointer"></td>
+                    <td class="fxb k2 w2" style="border-bottom:1px solid #f0eee8;padding:3px 14px;white-space:nowrap;font-family:ui-monospace,Consolas,monospace;background:{{ r.fixBg }};{{ r.dimStyle }}">{{ r.code }}</td>
+                    <td class="fxb k3 w3" style="border-bottom:1px solid #f0eee8;padding:3px 10px;white-space:nowrap;font-weight:600;background:{{ r.fixBg }};{{ r.dimStyle }}">{{ r.name }}</td>
+                    <sc-if value="{{ hasUnitCol }}" hint-placeholder-val="{{ true }}">
+                    <td class="fxb k4 w4" style="border-bottom:1px solid #f0eee8;padding:2px 6px;text-align:center;white-space:nowrap;background:{{ r.fixBg }}">
+                      <select value="{{ r.unitVal }}" onChange="{{ r.onUnit }}" style="font-size:12px;padding:2px 4px;border:1px solid #ddd9d0;border-radius:3px;background:#fffdf2;color:#333">
+                        <option value="">—</option>
+                        <sc-for list="{{ unitOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+                      </select>
+                    </td>
+                    </sc-if>
+                    <td class="fxb k5 w5" style="border-bottom:1px solid #f0eee8;padding:3px 10px;text-align:center;background:{{ r.fixBg }};{{ r.expandStyle }}">
+                      <sc-if value="{{ r.manual }}" hint-placeholder-val="{{ false }}"><input type="number" min="0" value="{{ r.expandVal }}" onChange="{{ r.onExpand }}" placeholder="—" style="width:44px;font-size:12px;padding:2px 4px;border:1px solid #ddd9d0;border-radius:3px;text-align:center;background:#fffdf2"></sc-if>
+                      <sc-if value="{{ r.notManual }}" hint-placeholder-val="{{ true }}">{{ r.expand }}</sc-if>
+                    </td>
+                    <td class="fxb k6 w6 kedge" style="border-bottom:1px solid #f0eee8;padding:2px 6px;text-align:center;font-weight:400;color:#777777;background:{{ r.fixBg }}">{{ r.rowTotal }}</td>
+                    <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td onClick="{{ c.onClick }}" onMouseEnter="{{ c.onMouseEnter }}" onMouseLeave="{{ c.onMouseLeave }}" style="border-bottom:1px solid #f0eee8;border-left:1px solid #f7f5f0;padding:2px 4px;text-align:center;font-size:13.5px;line-height:1.1;{{ c.style }}">{{ c.m }}</td></sc-for>
+                  </tr>
+                </sc-for>
+                <tr>
+                  <td class="fxb k1 w1" style="background:#faf9f6;padding:5px 6px"></td>
+                  <td colSpan="{{ storeColSpan }}" class="fxb" style="padding: 5px 14px; font-size: 11px; text-align: right; font-weight: 600; color: #999; left: 36px; background-color: #FAF9F6">送付店舗 計</td>
+                  <td class="fxb k6 w6 kedge" style="padding: 5px 6px; text-align: center; font-weight: 600; color: #999999; background-color: #FAF9F6">{{ grandTotal }}</td>
+                  <sc-for list="{{ totals }}" as="tt" hint-placeholder-count="5"><td style="background:#faf9f6;border-left:{{ tt.bl }};padding:5px 4px;text-align:center;font-weight:700;color:#1e5232">{{ tt.v }}</td></sc-for>
+                </tr>              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:8px">単位が未設定の店舗は「展開」に数字を手入力し、●をクリックしてチェックできます（展開数と●の数を一致させてください）。住所・電話などの店舗情報は「マスタ &gt; 店舗」で管理しています。●が確定したら「発送リスト」画面でCSVを出力できます。</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ 発送リスト ============ -->
+  <sc-if value="{{ vShipList }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="発送リスト" style="padding:16px 20px 56px;max-width:1240px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:2px">発送リスト（帳簿CSV）</div>
+      <div style="font-size:12px;color:#888;margin-bottom:14px">{{ shRetailerName }} の全黒丸表の●から 1行＝1店舗×1商品 で生成します。CSVは物流帳簿の36項目・UTF-8で出力。</div>
+
+      <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;padding:12px 16px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px">発送リスト作成情報</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">DENYMD（伝票日付）<span style="color:#a04030;font-family:inherit">必須</span>
+            <input value="{{ shDenymd }}" onChange="{{ onShDenymd }}" placeholder="2026/01/19" style="width:110px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">DATC（データ区分）
+            <input value="{{ shDatc }}" onChange="{{ onShDatc }}" style="width:56px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px;text-align:center">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">GYONO（行番号）
+            <input value="{{ shGyono }}" onChange="{{ onShGyono }}" style="width:56px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px;text-align:center">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">TOKCD（得意先コード・空欄可）
+            <input value="{{ shTokcd }}" onChange="{{ onShTokcd }}" style="width:100px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">イベント名（SYONMに連結）
+            <input value="{{ shEvent }}" onChange="{{ onShEvent }}" placeholder="販促POP" style="width:120px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px;font-family:inherit"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#777;font-family:ui-monospace,Consolas,monospace">MKNM（メーカー名・全行一律）
+            <input value="{{ shMknm }}" onChange="{{ onShMknm }}" placeholder="例 ヘルス" style="width:110px;font-size:12.5px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px;font-family:inherit">
+          </label>
+        </div>
+        <div style="font-size:11px;color:#999;margin-top:10px">小売店の固定値: {{ shFixedLine }}　<a href="#" onClick="{{ onGoRetailerMaster }}" style="font-size:11px">マスタ &gt; 小売店 で編集</a></div>
+      </div>
+
+      <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;padding:12px 16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onClick="{{ onCsvColsToggleOpen }}">
+          <span style="font-size:11px;color:#999">{{ csvColsToggleIcon }}</span>
+          <span style="font-size:12px;font-weight:700;color:#555">CSV出力項目（この小売店ごとに保存）</span>
+          <span style="font-size:10.5px;color:#999">{{ csvColsSummary }}</span>
+        </div>
+        <sc-if value="{{ csvColsOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px;margin:10px 0 8px">
+            <span style="font-size:10.5px;color:#999">↑↓で並び替え・チェックで出力有無</span>
+            <div style="flex:1"></div>
+            <button onClick="{{ onCsvColsReset }}" style="border:none;background:transparent;color:#888;font-size:11px;cursor:pointer;text-decoration:underline">既定順に戻す</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;max-height:360px;overflow-y:auto;border:1px solid #eceae3;border-radius:6px;padding:4px">
+            <sc-for list="{{ csvColItems }}" as="cc" hint-placeholder-count="10">
+              <div style="{{ cc.style }}">
+                <input type="checkbox" checked="{{ cc.on }}" onChange="{{ cc.onToggle }}" style="cursor:pointer">
+                <input value="{{ cc.key }}" onChange="{{ cc.onKeyChange }}" style="font-family:ui-monospace,Consolas,monospace;font-size:11.5px;width:78px;flex-shrink:0;border:1px solid #e4e1d9;border-radius:3px;padding:2px 4px;background:#fff">
+                <span style="font-size:11.5px;color:#999;width:150px;flex-shrink:0">{{ cc.source }}</span>
+                <button onClick="{{ cc.onUp }}" disabled="{{ cc.isFirst }}" style="{{ cc.upStyle }}">▲</button>
+                <button onClick="{{ cc.onDown }}" disabled="{{ cc.isLast }}" style="{{ cc.downStyle }}">▼</button>
+                <button onClick="{{ cc.onDel }}" style="border:none;background:transparent;color:#a88;font-size:11px;cursor:pointer;text-decoration:underline;margin-left:4px">削除</button>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ onCsvColAdd }}" style="margin-top:8px;padding:5px 14px;border:1px dashed #b0aca2;background:#faf9f6;color:#777;border-radius:4px;font-size:11.5px;cursor:pointer">＋ 出力項目を追加（空欄固定）</button>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <span style="font-size:12.5px;color:#555">生成行数 <b style="color:#1e5232;font-size:14px">{{ shRowCount }}</b> 行（伝票番号 1〜{{ shRowCount }} 自動連番）</span>
+        <div style="flex:1"></div>
+        <button onClick="{{ onShExport }}" style="{{ shExportStyle }}">CSV出力（UTF-8）</button>
+        <button onClick="{{ onShExportXlsx }}" style="{{ shExportXlsxStyle }}">Excel出力（.xlsx）</button>
+      </div>
+
+      <sc-if value="{{ shHasRows }}" hint-placeholder-val="{{ true }}">
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;overflow:hidden">
+          <div class="tbl-scroll">
+            <table style="border-collapse:collapse;font-size:11.5px;width:100%">
+              <thead><tr class="sticky-head">
+                <sc-for list="{{ shHead }}" as="h" hint-placeholder-count="10"><th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 8px;font-size:10px;color:#777;white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-weight:600">{{ h.t }}</th></sc-for>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ shRows }}" as="s" hint-placeholder-count="10">
+                  <tr style="{{ s.style }}">
+                    <sc-for list="{{ s.cells }}" as="v" hint-placeholder-count="10"><td style="border-bottom:1px solid #f0eee8;padding:3px 8px;white-space:nowrap;font-size:11px">{{ v.t }}</td></sc-for>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="font-size:10.5px;color:#bbb;margin-top:6px">列は上のCSV出力項目の並び・チェックに連動します。</div>
+      </sc-if>
+      <sc-if value="{{ shNoRows }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #b0aca2;border-radius:6px;padding:28px;text-align:center;color:#666;font-size:13px">●が1件もありません。黒丸表で単位・棚割りを設定してください。</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ マスタ ============ -->
+  <sc-if value="{{ vMaster }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="マスタ" style="padding:16px 20px 56px;max-width:1280px">
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <button onClick="{{ onMRetailers }}" style="{{ mRetailersTabStyle }}">小売店</button>
+        <button onClick="{{ onMStores }}" style="{{ mStoresTabStyle }}">店舗</button>
+        <button onClick="{{ onMProducts }}" style="{{ mProductsTabStyle }}">商品</button>
+      </div>
+
+      <sc-if value="{{ vRetailers }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:14px;font-weight:700;margin-bottom:2px">小売店マスタ</div>
+        <div style="font-size:12px;color:#999;margin-bottom:12px">帳簿CSVの得意先情報（MKCD・TOKNM・TKPOST 等）の参照元。店舗・商品・黒丸表は小売店ごとに管理されます。</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;background:#faf9f6;border:1px solid #eceae3;border-radius:6px;padding:10px 12px">
+          <span style="font-size:12px;font-weight:700;color:#555">追加:</span>
+          <input value="{{ nrVal }}" onChange="{{ onNr }}" placeholder="新しい小売店名（例: ○○ドラッグ）" style="width:240px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <button onClick="{{ onNrAdd }}" style="padding:5px 16px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">追加</button>
+          <span style="font-size:11px;color:#999">追加すると空の店舗・商品・黒丸表がその小売店用に作られます。</span>
+        </div>
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;overflow:hidden">
+          <div class="tbl-scroll">
+            <table style="border-collapse:collapse;font-size:12px;width:100%">
+              <thead><tr class="sticky-head">
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap;text-align:left">小売店名</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap;text-align:left">得意先名（TOKNM）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">部署名（任意）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">メーカーコード</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">郵便番号</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">電話番号</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">FAX（任意）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;text-align:left">住所1</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 8px"></th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ retailerRows }}" as="r" hint-placeholder-count="2">
+                  <tr style="{{ r.style }}">
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.name }}" onChange="{{ r.onName }}" style="width:110px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-weight:600"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.toknm }}" onChange="{{ r.onToknm }}" style="width:140px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.dept }}" onChange="{{ r.onDept }}" style="width:90px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center"><input value="{{ r.mkcd }}" onChange="{{ r.onMkcd }}" style="width:56px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;text-align:center;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.zip }}" onChange="{{ r.onZip }}" style="width:78px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.tel }}" onChange="{{ r.onTel }}" style="width:104px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.fax }}" onChange="{{ r.onFax }}" style="width:104px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ r.addr }}" onChange="{{ r.onAddr }}" style="width:230px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center">
+                      <sc-if value="{{ r.canDel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.onDel }}" style="border:none;background:transparent;color:#a88;font-size:11px;cursor:pointer;text-decoration:underline">削除</button></sc-if>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+          <input value="{{ nrVal }}" onChange="{{ onNr }}" placeholder="新しい小売店名（例: ○○ドラッグ）" style="width:240px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <button onClick="{{ onNrAdd }}" style="padding:5px 16px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">追加</button>
+          <span style="font-size:11px;color:#999">追加すると空の店舗・商品・黒丸表がその小売店用に作られます。</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ vStores }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:700">店舗マスタ<span style="font-size:12px;font-weight:400;color:#999">　{{ shRetailerName }}・{{ storeCount }}店・店番キーで上書き／追加</span></div>
+          <div style="flex:1"></div>
+          <button onClick="{{ onOpenStoresCsv }}" style="padding:6px 16px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">CSV取込</button>
+        </div>
+        <div style="border:1px solid #eceae3;background:#faf9f6;border-radius:6px;padding:10px 12px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px">店舗を追加</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input value="{{ nfCode }}" onChange="{{ onNfCode }}" placeholder="店番" style="width:80px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px;font-family:ui-monospace,Consolas,monospace">
+            <input value="{{ nfName }}" onChange="{{ onNfName }}" placeholder="店舗名称" style="width:180px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+            <input value="{{ nfZip }}" onChange="{{ onNfZip }}" placeholder="郵便番号" style="width:88px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+            <input value="{{ nfAddr }}" onChange="{{ onNfAddr }}" placeholder="住所" style="width:220px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+            <input value="{{ nfTel }}" onChange="{{ onNfTel }}" placeholder="電話番号" style="width:110px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+            <button onClick="{{ onNfAdd }}" style="padding:5px 16px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">追加</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <input value="{{ sSearch }}" onChange="{{ onSSearch }}" placeholder="🔍 店番・店舗名称・住所・エリア・BL名で検索" style="width:320px;font-size:12px;padding:6px 10px;border:1px solid #ddd9d0;border-radius:4px">
+          <sc-if value="{{ sSearchActive }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:#999">{{ storeCount }}件中 {{ storeShownCount }}件表示　<span onClick="{{ onSSearchClear }}" style="color:#1f6e43;cursor:pointer;text-decoration:underline">クリア</span></span></sc-if>
+        </div>
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;overflow:hidden">
+          <div class="tbl-scroll">
+            <table style="border-collapse:collapse;font-size:12px;width:100%">
+              <thead><tr class="sticky-head">
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">店番</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap;text-align:left">店舗名称（HAINM）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">郵便番号（HAPOST）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;text-align:left">住所（HAIADD1）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">電話番号（HATEL）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">FAX（HAFAX・任意）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">配送先コード1（HAICD_1）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap">部署名（HAIBNM・任意）</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap;text-align:left">エリア</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 10px;font-size:11px;color:#777;white-space:nowrap;text-align:left">BL名</th>
+                <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 8px"></th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ storeRows }}" as="s" hint-placeholder-count="10">
+                  <tr style="{{ s.style }}">
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.code }}" onChange="{{ s.onCode }}" style="width:58px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace;color:#555"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.name }}" onChange="{{ s.onName }}" style="width:150px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-weight:600"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.zip }}" onChange="{{ s.onZip }}" style="width:74px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.addr }}" onChange="{{ s.onAddr }}" style="width:220px;font-size:11.5px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.tel }}" onChange="{{ s.onTel }}" style="width:100px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.fax }}" onChange="{{ s.onFax }}" style="width:100px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px;text-align:center"><input value="{{ s.haicd }}" onChange="{{ s.onHaicd }}" style="width:52px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;text-align:center;font-family:ui-monospace,Consolas,monospace"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 6px"><input value="{{ s.dept }}" onChange="{{ s.onDept }}" style="width:80px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:4px 10px;white-space:nowrap;color:#999;font-size:11px">{{ s.area }}</td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:4px 10px;white-space:nowrap;color:#999;font-size:11px">{{ s.bl }}</td>
+                    <td style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center"><button onClick="{{ s.onDel }}" style="border:none;background:transparent;color:#a88;font-size:11px;cursor:pointer;text-decoration:underline">削除</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin:8px 0 0">店舗名称は帳簿CSVの配送先名（HAINM）にそのまま出力されます（例: サツドラめむろ店）。配送先コード1の既定は 0。店番は重複しないようにしてください。</div>
+      </sc-if>
+
+      <sc-if value="{{ vProducts }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:700">商品マスタ<span style="font-size:12px;font-weight:400;color:#999">　{{ shRetailerName }}・{{ productCount }}商品・商品コードキーで上書き／追加（自動採番なし）</span></div>
+          <div style="flex:1"></div>
+          <button onClick="{{ onOpenProductsCsv }}" style="padding:6px 16px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">CSV取込</button>
+        </div>
+
+        <div style="font-size:13px;font-weight:700;margin:4px 0 2px">商品カテゴリ</div>
+        <div style="font-size:11.5px;color:#999;margin-bottom:10px">商品との紐付けは下の商品一覧の「カテゴリ」列で設定します。</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;background:#faf9f6;border:1px solid #eceae3;border-radius:6px;padding:10px 12px">
+          <span style="font-size:12px;font-weight:700;color:#555">追加:</span>
+          <input value="{{ ncVal }}" onChange="{{ onNc }}" placeholder="新しいカテゴリ名" style="width:220px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <button onClick="{{ onNcAdd }}" style="padding:5px 16px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">追加</button>
+        </div>
+        <div style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;overflow:hidden;max-width:520px">
+          <table style="border-collapse:collapse;font-size:12px;width:100%">
+            <tbody>
+              <sc-for list="{{ catRows }}" as="c" hint-placeholder-count="3">
+                <tr style="{{ c.style }}">
+                  <td style="border-bottom:1px solid #f0eee8;padding:6px 14px;font-weight:600">{{ c.name }}</td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:6px 14px;color:#999;white-space:nowrap">{{ c.count }}商品</td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:4px 14px;text-align:right">
+                    <sc-if value="{{ c.canDel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.onDel }}" style="border:none;background:transparent;color:#a88;font-size:11.5px;cursor:pointer;text-decoration:underline">削除</button></sc-if>
+                    <sc-if value="{{ c.inUse }}" hint-placeholder-val="{{ true }}"><span style="font-size:10.5px;color:#bbb">使用中</span></sc-if>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-size:13px;font-weight:700;margin:22px 0 2px">商品一覧</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;background:#faf9f6;border:1px solid #eceae3;border-radius:6px;padding:10px 12px">
+          <span style="font-size:12px;font-weight:700;color:#555">追加:</span>
+          <input value="{{ pfId }}" onChange="{{ onPfId }}" placeholder="商品コード" style="width:100px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <input value="{{ pfName }}" onChange="{{ onPfName }}" placeholder="商品名" style="width:180px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <select value="{{ pfCat }}" onChange="{{ onPfCat }}" style="font-size:12px;padding:5px;border:1px solid #ddd9d0;border-radius:4px;background:#fff">
+            <sc-for list="{{ catOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.name }}">{{ o.name }}</option></sc-for>
+          </select>
+          <input value="{{ pfMaker }}" onChange="{{ onPfMaker }}" placeholder="製造業者" style="width:110px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <input value="{{ pfJan }}" onChange="{{ onPfJan }}" placeholder="JANコード" style="width:126px;font-size:12px;padding:5px 8px;border:1px solid #ddd9d0;border-radius:4px">
+          <button onClick="{{ onPfAdd }}" style="padding:5px 16px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">追加</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <input value="{{ pSearch }}" onChange="{{ onPSearch }}" placeholder="🔍 商品コード・商品名・カテゴリ・製造業者・JANで検索" style="width:340px;font-size:12px;padding:6px 10px;border:1px solid #ddd9d0;border-radius:4px">
+          <sc-if value="{{ pSearchActive }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:#999">{{ productCount }}件中 {{ productShownCount }}件表示　<span onClick="{{ onPSearchClear }}" style="color:#1f6e43;cursor:pointer;text-decoration:underline">クリア</span></span></sc-if>
+        </div>
+        <div class="tbl-scroll" style="border:1px solid #ddd9d0;background:#fff;border-radius:6px;max-width:980px">
+          <table style="border-collapse:collapse;font-size:12px;width:100%">
+            <thead><tr class="sticky-head">
+              <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">商品コード（SYOCD1）</th>
+              <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;text-align:left">商品名（SYONMの元）</th>
+              <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">カテゴリ</th>
+              <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap;text-align:left">製造業者</th>
+              <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:6px 12px;font-size:11px;color:#777;white-space:nowrap">JANコード（JAN）</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ productRows }}" as="p" hint-placeholder-count="8">
+                <tr style="{{ p.style }}">
+                  <td style="border-bottom:1px solid #f0eee8;padding:4px 12px;font-family:ui-monospace,Consolas,monospace;color:#777">{{ p.id }}</td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ p.name }}" onChange="{{ p.onName }}" style="width:190px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-weight:600"></td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center">
+                    <select value="{{ p.cat }}" onChange="{{ p.onCat }}" style="font-size:11.5px;padding:2px 3px;border:1px solid #ddd9d0;border-radius:3px;background:#fff;color:#555">
+                      <sc-for list="{{ catOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.name }}">{{ o.name }}</option></sc-for>
+                    </select>
+                  </td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ p.maker }}" onChange="{{ p.onMaker }}" style="width:110px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px"></td>
+                  <td style="border-bottom:1px solid #f0eee8;padding:3px 8px"><input value="{{ p.jan }}" onChange="{{ p.onJan }}" style="width:126px;font-size:12px;padding:3px 6px;border:1px solid #e4e1d9;border-radius:3px;font-family:ui-monospace,Consolas,monospace"></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">JANコードは帳簿CSVのJAN列に出力されます。商品名は「商品コード＋イベント名＋カテゴリ＋黒丸表番号＋商品名」に連結されます。</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: 商品を選ぶ ============ -->
+  <sc-if value="{{ mProducts }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:600px;max-width:94vw;max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3;position:sticky;top:0;background:#fff">商品を選ぶ<span style="font-size:11px;font-weight:400;color:#999;margin-left:8px">この黒丸表のみ・即時反映</span><button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:14px 18px">
+          <sc-for list="{{ pmCats }}" as="pc" hint-placeholder-count="3">
+            <div style="border:1px solid #eceae3;border-radius:6px;margin-bottom:10px;overflow:hidden">
+              <label style="display:flex;align-items:center;gap:8px;background:#faf9f6;padding:8px 14px;font-size:13px;font-weight:700;color:#333;cursor:pointer">
+                <input type="checkbox" checked="{{ pc.on }}" onChange="{{ pc.onToggle }}">{{ pc.name }}
+              </label>
+              <div style="display:flex;flex-wrap:wrap;gap:4px 18px;padding:8px 16px">
+                <sc-for list="{{ pc.prods }}" as="pp" hint-placeholder-count="4">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:#444">
+                    <input type="checkbox" checked="{{ pp.on }}" onChange="{{ pp.onToggle }}" disabled="{{ pp.dis }}">{{ pp.name }}
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div style="text-align:right"><button onClick="{{ closeModal }}" style="padding:7px 20px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">完了</button></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: 棚割り ============ -->
+  <sc-if value="{{ mShelf }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:720px;max-width:94vw;max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3;position:sticky;top:0;background:#fff">棚割り<span style="font-size:11px;font-weight:400;color:#999;margin-left:8px">単位 → 棚割り数 → 送る商品・●は即時再計算</span><button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:14px 18px">
+          <sc-for list="{{ shelfCats }}" as="sc" hint-placeholder-count="1">
+            <div style="margin-bottom:22px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="font-size:13px;font-weight:700;color:#1e5232">{{ sc.name }}</span>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-left:auto">
+                  <span style="font-size:11.5px;color:#777">棚割り設定を使う</span>
+                  <span onClick="{{ sc.onToggleUse }}" style="{{ sc.switchTrackStyle }}"><span style="{{ sc.switchThumbStyle }}"></span></span>
+                </label>
+              </div>
+
+              <sc-if value="{{ sc.useShelf }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+                <div>
+                  <div style="font-size:11.5px;font-weight:700;color:#555;margin-bottom:5px">STEP 1　単位ごとの棚割り数</div>
+                  <table style="border-collapse:collapse;font-size:12px">
+                    <thead><tr>
+                      <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 14px;font-size:11px;color:#777;white-space:nowrap;text-align:left">単位</th>
+                      <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 14px;font-size:11px;color:#777;white-space:nowrap">棚割り数</th>
+                      <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 6px"></th>
+                    </tr></thead>
+                    <tbody>
+                      <sc-for list="{{ sc.unitRows }}" as="r" hint-placeholder-count="5">
+                        <tr>
+                          <td style="border-bottom:1px solid #f0eee8;padding:4px 14px;font-weight:600;white-space:nowrap">{{ r.label }}<span style="font-weight:400;color:#bbb;font-size:10px;margin-left:5px">{{ r.inStore }}</span></td>
+                          <td style="border-bottom:1px solid #f0eee8;padding:3px 14px;text-align:center">
+                            <input type="number" min="0" step="1" value="{{ r.countVal }}" onChange="{{ r.onCount }}" onKeyDown="{{ numGuard }}" placeholder="送らない" style="width:82px;font-size:12px;padding:2px 5px;border:1px solid #ddd9d0;border-radius:3px;background:#fffdf2;color:#333;text-align:center">
+                          </td>
+                          <td style="border-bottom:1px solid #f0eee8;padding:3px 6px;text-align:center"><button onClick="{{ r.onDelUnit }}" title="この単位を削除" style="border:none;background:transparent;color:#c3a0a0;font-size:13px;cursor:pointer;line-height:1">✕</button></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                    <span style="font-size:11px;color:#999">単位を追加:</span>
+                    <input type="number" min="1" step="1" value="{{ sc.newUnitVal }}" onChange="{{ sc.onNewUnit }}" onKeyDown="{{ numGuard }}" placeholder="本" style="width:56px;font-size:12px;padding:4px 6px;border:1px solid #ddd9d0;border-radius:4px">
+                    <span style="font-size:11px;color:#999">本</span>
+                    <button onClick="{{ sc.onAddUnit }}" style="padding:4px 12px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:11.5px;cursor:pointer;font-weight:600">追加</button>
+                  </div>
+                </div>
+
+                <div style="flex:1;min-width:340px">
+                  <div style="font-size:11.5px;font-weight:700;color:#555;margin-bottom:5px">STEP 2　棚割り数ごとに送る商品・棚割り表画像</div>
+                  <sc-if value="{{ sc.noVar }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;color:#999;padding:8px 0">棚割り数のバリエーションがまだありません。下の欄から追加してください。</div></sc-if>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ sc.countRows }}" as="r" hint-placeholder-count="2">
+                      <div style="border:1px solid #eceae3;border-radius:6px;padding:8px 10px">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                          <b style="color:#1e5232;font-size:12.5px">棚割り数 {{ r.count }}</b>
+                          <span style="color:#aaa;font-size:10.5px">割当: {{ r.usedBy }}</span>
+                          <span style="font-size:10.5px;{{ r.warnStyle }}">送る商品 {{ r.selLabel }}</span>
+                          <button onClick="{{ r.onDelVar }}" style="margin-left:auto;border:none;background:transparent;color:#a88;font-size:10.5px;cursor:pointer;text-decoration:underline">このバリエーションを削除</button>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+                          <div style="display:flex;flex-wrap:wrap;gap:4px 14px;flex:1;min-width:200px">
+                            <sc-for list="{{ r.checks }}" as="c" hint-placeholder-count="5">
+                              <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;cursor:pointer;color:#444"><input type="checkbox" checked="{{ c.on }}" onChange="{{ c.onToggle }}" style="cursor:pointer">{{ c.label }}</label>
+                            </sc-for>
+                          </div>
+                          <div style="text-align:center">
+                            <sc-if value="{{ r.hasImg }}" hint-placeholder-val="{{ false }}">{{ r.imgEl }}</sc-if>
+                            <sc-if value="{{ r.noImg }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.onImg }}" style="height:52px;width:120px;border:1px dashed #b0aca2;border-radius:4px;background:#faf9f6;color:#888;font-size:10.5px;cursor:pointer">＋ 棚割り表画像</button></sc-if>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                    <span style="font-size:11px;color:#999">棚割り数を追加:</span>
+                    <input type="number" min="1" step="1" value="{{ sc.newVarVal }}" onChange="{{ sc.onNewVar }}" onKeyDown="{{ numGuard }}" placeholder="例 4" style="width:64px;font-size:12px;padding:4px 6px;border:1px solid #ddd9d0;border-radius:4px">
+                    <button onClick="{{ sc.onAddVar }}" style="padding:4px 14px;border:1px solid #1e6a41;background:#fff;color:#1e6a41;border-radius:4px;font-size:11.5px;cursor:pointer;font-weight:600">追加</button>
+                  </div>
+                </div>
+              </div>
+              </sc-if>
+              <sc-if value="{{ sc.notUseShelf }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;color:#aaa;padding:6px 0">この商品カテゴリは棚割り設定を使いません（全店舗、単位に関わらず対象外）。</div></sc-if>
+            </div>
+          </sc-for>
+          <div style="font-size:11px;color:#aaa;margin-bottom:12px">棚割り数を空欄にするとその単位の店舗には●が付きません。棚割り表画像は STEP 2 の各バリエーションで登録します。</div>
+          <div style="text-align:right"><button onClick="{{ closeModal }}" style="padding:7px 20px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">完了</button></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: 配送情報 ============ -->
+  <sc-if value="{{ mDelivery }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:840px;max-width:96vw;max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3;position:sticky;top:0;background:#fff">配送情報<span style="font-size:11px;font-weight:400;color:#999;margin-left:8px">対象商品ごと・YYYY/MM/DD</span><button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:14px 18px">
+          <sc-for list="{{ dmCats }}" as="dc" hint-placeholder-count="1">
+            <div style="margin-bottom:14px">
+              <div style="font-size:13px;font-weight:700;color:#1e5232;margin-bottom:6px">{{ dc.name }}</div>
+              <div style="overflow-x:auto">
+                <table style="border-collapse:collapse;font-size:12px">
+                  <thead><tr>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777;white-space:nowrap;text-align:left">商品</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">サムネイル</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">CD</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">入稿期限</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">店舗着</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">ラウンダー</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">JANコード</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">帯</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">同梱</th>
+                    <th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:5px 10px;font-size:11px;color:#777">備考</th>
+                  </tr></thead>
+                  <tbody>
+                    <sc-for list="{{ dc.rows }}" as="r" hint-placeholder-count="5">
+                      <tr>
+                        <td style="border-bottom:1px solid #f0eee8;padding:3px 10px;white-space:nowrap;font-weight:600">{{ r.no }} {{ r.name }}</td>
+                        <td style="border-bottom:1px solid #f0eee8;padding:3px 8px;text-align:center;white-space:nowrap">
+                          <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                            <sc-if value="{{ r.hasThumb }}" hint-placeholder-val="{{ false }}">{{ r.thumbEl }}</sc-if>
+                            <label style="font-size:10.5px;color:#1f6e43;cursor:pointer;text-decoration:underline"><input type="file" accept="image/*" onChange="{{ r.onThumb }}" style="display:none">{{ r.thumbLabel }}</label>
+                            <sc-if value="{{ r.hasThumb }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.onRemoveThumb }}" style="border:none;background:transparent;color:#a88;font-size:10.5px;cursor:pointer">✕</button></sc-if>
+                          </div>
+                        </td>
+                        <sc-for list="{{ r.fields }}" as="f" hint-placeholder-count="7"><td style="border-bottom:1px solid #f0eee8;padding:3px 4px;text-align:center">
+                          <sc-if value="{{ f.isCheck }}" hint-placeholder-val="{{ false }}"><input type="checkbox" checked="{{ f.checked }}" onChange="{{ f.oc }}" style="cursor:pointer;width:16px;height:16px"></sc-if>
+                          <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}"><input value="{{ f.v }}" onChange="{{ f.oc }}" style="{{ f.style }}"></sc-if>
+                        </td></sc-for>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </sc-for>
+          <div style="text-align:right"><button onClick="{{ closeModal }}" style="padding:7px 20px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600">完了</button></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: CSVインポート ============ -->
+  <sc-if value="{{ mCsv }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:760px;max-width:96vw;max-height:84vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3;position:sticky;top:0;background:#fff">{{ cmTitle }}<button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:14px 18px">
+          <div style="font-size:11.5px;color:#888;margin-bottom:10px;line-height:1.7">{{ cmNote }}<br>文字コードは UTF-8 / Shift-JIS を自動判定。 <button onClick="{{ cmOnTemplate }}" style="border:none;background:transparent;color:#1f6e43;font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0">雛形CSVをダウンロード</button></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:#faf9f6;border:1px dashed #b0aca2;padding:14px;border-radius:6px">
+            <input type="file" accept=".csv,text/csv" onChange="{{ cmOnFile }}" style="font-size:12px">
+            <span style="font-size:11.5px;color:#999">{{ cmFileName }}</span>
+          </div>
+          <sc-if value="{{ cmHasErrors }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fbf1ef;border:1px solid #e5c8c1;border-radius:4px;padding:8px 12px;margin-bottom:10px">
+              <div style="font-size:12px;font-weight:700;color:#a04030;margin-bottom:4px">取り込めない行があります（スキップされます）</div>
+              <sc-for list="{{ cmErrors }}" as="e" hint-placeholder-count="2"><div style="font-size:11.5px;color:#a04030">{{ e.t }}</div></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cmHasRows }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11.5px;color:#777;margin-bottom:4px">プレビュー（{{ cmOkCount }}件 取込可 / {{ cmNgCount }}件 エラー）</div>
+            <div style="overflow:auto;max-height:280px;border:1px solid #eceae3;border-radius:4px;margin-bottom:12px">
+              <table style="border-collapse:collapse;font-size:11.5px;width:100%">
+                <thead><tr><sc-for list="{{ cmHead }}" as="h" hint-placeholder-count="5"><th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:3px 10px;font-size:10.5px;color:#777;white-space:nowrap;position:sticky;top:0">{{ h.t }}</th></sc-for><th style="border-bottom:1px solid #ddd9d0;background:#faf9f6;padding:3px 10px;font-size:10.5px;color:#777;position:sticky;top:0">判定</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ cmRows }}" as="r" hint-placeholder-count="6">
+                    <tr style="{{ r.style }}"><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td style="border-bottom:1px solid #f0eee8;padding:2px 10px;white-space:nowrap">{{ c.t }}</td></sc-for><td style="border-bottom:1px solid #f0eee8;padding:2px 10px;white-space:nowrap;font-size:10.5px;color:#a04030">{{ r.err }}</td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button onClick="{{ closeModal }}" style="padding:7px 14px;border:1px solid #ddd9d0;background:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;color:#555">キャンセル</button>
+            <button onClick="{{ cmOnApply }}" style="{{ cmApplyStyle }}">{{ cmApplyLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: 棚割り画像 ============ -->
+  <sc-if value="{{ mUnitImg }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:520px;max-width:94vw;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3">棚割り画像<span style="font-size:11px;font-weight:400;color:#999;margin-left:8px">{{ uiStoreLabel }}</span><button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:14px 18px">
+          <div style="font-size:11.5px;color:#888;margin-bottom:12px">この棚割り数の見本画像をアップロードします（最大 2MB）。</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:#faf9f6;border:1px dashed #b0aca2;padding:12px;border-radius:6px">
+            <input type="file" accept="image/*" onChange="{{ uiOnFile }}" style="font-size:12px;flex:1">
+            <span style="font-size:11px;color:#999;white-space:nowrap">{{ uiFileName }}</span>
+          </div>
+          <sc-if value="{{ uiHasPreview }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:12px">
+              <div style="font-size:11px;color:#999;margin-bottom:6px">プレビュー</div>
+              {{ uiPreviewEl }}
+            </div>
+          </sc-if>
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button onClick="{{ closeModal }}" style="padding:7px 14px;border:1px solid #ddd9d0;background:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;color:#555">キャンセル</button>
+            <button onClick="{{ uiOnSave }}" style="{{ uiSaveStyle }}">保存する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ モーダル: 新規黒丸表 ============ -->
+  <sc-if value="{{ mNewSheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(22,20,16,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopProp }}" style="background:#fff;border-radius:8px;width:440px;max-width:94vw;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+        <div style="display:flex;align-items:center;padding:12px 18px;font-size:14px;font-weight:700;border-bottom:1px solid #eceae3">黒丸表の新規作成<button onClick="{{ closeModal }}" style="margin-left:auto;border:none;background:transparent;color:#999;font-size:16px;cursor:pointer">✕</button></div>
+        <div style="padding:16px 18px">
+          <div style="font-size:12px;font-weight:600;margin-bottom:4px">名称</div>
+          <input value="{{ nsName }}" onChange="{{ onNsName }}" placeholder="例: 黒丸表C 胃腸薬（4月着）" style="width:100%;box-sizing:border-box;font-size:13px;padding:7px 9px;border:1px solid #ddd9d0;border-radius:4px;margin-bottom:14px">
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button onClick="{{ onNsModeDup }}" style="{{ nsDupStyle }}">現在の表を複製</button>
+            <button onClick="{{ onNsModeTpl }}" style="{{ nsTplStyle }}">テンプレートから</button>
+            <button onClick="{{ onNsModeBlank }}" style="{{ nsBlankStyle }}">空から作成</button>
+          </div>
+          <sc-if value="{{ nsModeTpl }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:14px">
+              <sc-if value="{{ nsHasTpl }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size:12px;font-weight:600;margin-bottom:4px">使用するテンプレート</div>
+                <select value="{{ nsTplId }}" onChange="{{ onNsTpl }}" style="width:100%;box-sizing:border-box;font-size:13px;padding:7px 9px;border:1px solid #ddd9d0;border-radius:4px;background:#fff">
+                  <option value="">— 選択してください —</option>
+                  <sc-for list="{{ nsTplOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+                </select>
+                <div style="font-size:11px;color:#999;margin-top:5px">商品構成・棚割り・単位・店舗割当・●を引き継ぎます（配送情報の日付は空になります）。</div>
+              </sc-if>
+              <sc-if value="{{ nsNoTpl }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#999;background:#faf9f6;border:1px solid #eceae3;border-radius:4px;padding:10px 12px">保存済みのテンプレートがありません。黒丸表ツールバーの「テンプレート保存」で作成できます。</div></sc-if>
+            </div>
+          </sc-if>
+          <div style="text-align:right"><button onClick="{{ onNsCreate }}" style="padding:8px 22px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:13px;cursor:pointer;font-weight:600">作成する</button></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = Component.defaults();
+
+  static defaults() {
+    const kStoresRaw = [
+      { code: '0064', area: '第一エリア', bl: 'Aブロック', name: 'ひまわりみどり台店', zip: '100-0001', addr: '見本県さくら市みどり台1-2-3', tel: '0120-000-064' },
+      { code: '0147', area: '第一エリア', bl: 'Aブロック', name: 'ひまわりさくら通り店', zip: '100-0002', addr: '見本県さくら市さくら通り2-4-6', tel: '0120-000-147' },
+      { code: '0156', area: '第一エリア', bl: 'Bブロック', name: 'ひまわりひばりヶ丘店', zip: '100-0003', addr: '見本県あおば市ひばりヶ丘3-1-1', tel: '0120-000-156' },
+      { code: '0159', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり中央公園店', zip: '100-0004', addr: '見本県あおば市中央1-5-9', tel: '0120-000-159' },
+      { code: '0164', area: '第二エリア', bl: 'Cブロック', name: 'ひまわり港南台店', zip: '200-0001', addr: '架空県みなと市港南台1-1-1', tel: '0120-000-164' },
+      { code: '0168', area: '第二エリア', bl: 'Cブロック', name: 'ひまわり東雲店', zip: '200-0002', addr: '架空県みなと市東雲2-2-2', tel: '0120-000-168' },
+      { code: '0169', area: '第二エリア', bl: 'Dブロック', name: 'ひまわり若葉台店', zip: '200-0003', addr: '架空県みらい市若葉台3-3-3', tel: '0120-000-169' },
+      { code: '0171', area: '第三エリア', bl: 'Eブロック', name: 'ひまわり松風店', zip: '300-0001', addr: 'サンプル県うみべ市松風1-4-7', tel: '0120-000-171' },
+      { code: '0176', area: '第三エリア', bl: 'Eブロック', name: 'ひまわり白鳥店', zip: '300-0002', addr: 'サンプル県うみべ市白鳥2-5-8', tel: '0120-000-176' },
+      { code: '0185', area: '第三エリア', bl: 'Fブロック', name: 'ひまわり青葉店', zip: '300-0003', addr: 'サンプル県もり市青葉3-6-9', tel: '0120-000-185' },
+      { code: '0187', area: '第二エリア', bl: 'Dブロック', name: 'ひまわり大空店', zip: '200-0004', addr: '架空県みらい市大空4-1-2', tel: '0120-000-187' },
+      { code: '0188', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり花みずき店', zip: '100-0005', addr: '見本県あおば市花水木5-2-3', tel: '0120-000-188' },
+      { code: '0190', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり光ヶ丘店', zip: '100-0006', addr: '見本県さくら市光ヶ丘6-3-4', tel: '0120-000-190' },
+      { code: '0192', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり夕陽ヶ丘店', zip: '100-0007', addr: '見本県さくら市夕陽ヶ丘7-4-5', tel: '0120-000-192' },
+      { code: '0193', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり星ヶ峰店', zip: '100-0008', addr: '見本県あおば市星ヶ峰8-5-6', tel: '0120-000-193' },
+      { code: '0194', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり春日野店', zip: '100-0009', addr: '見本県あおば市春日野9-6-7', tel: '0120-000-194' },
+      { code: '0196', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり秋桜店', zip: '100-0010', addr: '見本県さくら市秋桜10-7-8', tel: '0120-000-196' },
+      { code: '0197', area: '第三エリア', bl: 'Eブロック', name: 'ひまわり里山店', zip: '300-0004', addr: 'サンプル県もり市里山1-8-9', tel: '0120-000-197' },
+      { code: '0199', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり泉ヶ丘店', zip: '100-0011', addr: '見本県さくら市泉ヶ丘11-1-1', tel: '0120-000-199' },
+      { code: '0200', area: '第一エリア', bl: 'Aブロック', name: 'ひまわり望海店', zip: '100-0012', addr: '見本県みずうみ市望海12-2-2', tel: '0120-000-200' },
+      { code: '0201', area: '第三エリア', bl: 'Fブロック', name: 'ひまわり緑川店', zip: '300-0005', addr: 'サンプル県もり市緑川2-3-3', tel: '0120-000-201' },
+      { code: '0202', area: '第二エリア', bl: 'Cブロック', name: 'ひまわり陽だまり店', zip: '200-0005', addr: '架空県みなと市陽だまり5-4-4', tel: '0120-000-202' },
+      { code: '0204', area: '第一エリア', bl: 'Bブロック', name: 'ひまわり潮見店', zip: '100-0013', addr: '見本県みずうみ市潮見13-5-5', tel: '0120-000-204' },
+      { code: '0205', area: '第三エリア', bl: 'Eブロック', name: 'ひまわり虹ヶ丘店', zip: '300-0006', addr: 'サンプル県うみべ市虹ヶ丘3-6-6', tel: '0120-000-205' },
+      { code: '0209', area: '第二エリア', bl: 'Cブロック', name: 'ひまわり藤棚店', zip: '200-0006', addr: '架空県みなと市藤棚6-7-7', tel: '0120-000-209' },
+      { code: '0215', area: '第一エリア', bl: 'Aブロック', name: 'ひまわり円山店', zip: '100-0014', addr: '見本県みずうみ市円山14-8-8', tel: '0120-000-215' }
+    ];
+    const kStores = kStoresRaw.map(s => Object.assign({ fax: '', haicd: '0', dept: '' }, s));
+    const kCategories = [{ name: '湿布' }, { name: '風邪薬' }, { name: '胃腸薬' }];
+    const janA = ['9999999990762', '9999999990779', '9999999990786', '9999999990793', '9999999990809'];
+    const kProducts = [
+      { id: 'P00001', name: 'サロンパス', cat: '湿布', maker: '久光製薬', jan: janA[0] },
+      { id: 'P00002', name: 'メルジン・ロキエフェクト', cat: '湿布', maker: 'メルジン', jan: janA[1] },
+      { id: 'P00003', name: 'フェイタスジクサス', cat: '湿布', maker: '久光製薬', jan: janA[2] },
+      { id: 'P00004', name: 'バンテリン', cat: '湿布', maker: '興和', jan: janA[3] },
+      { id: 'P00005', name: 'アンメルツ', cat: '湿布', maker: '小林製薬', jan: janA[4] },
+      { id: 'P00101', name: 'パブロンゴールドA', cat: '風邪薬', maker: '大正製薬', jan: '9999999990820' },
+      { id: 'P00102', name: 'ルルアタックEX', cat: '風邪薬', maker: '第一三共', jan: '9999999990821' },
+      { id: 'P00103', name: 'ベンザブロックL', cat: '風邪薬', maker: 'アリナミン製薬', jan: '9999999990822' },
+      { id: 'P00104', name: 'エスタックイブ', cat: '風邪薬', maker: 'エスエス製薬', jan: '9999999990823' },
+      { id: 'P00201', name: 'キャベジンコーワα', cat: '胃腸薬', maker: '興和', jan: '9999999990830' },
+      { id: 'P00202', name: '大正漢方胃腸薬', cat: '胃腸薬', maker: '大正製薬', jan: '9999999990831' }
+    ];
+    const sh = ['P00001', 'P00002', 'P00003', 'P00004', 'P00005'];
+    const kz = ['P00101', 'P00102', 'P00103', 'P00104'];
+    const ic = ['P00201', 'P00202'];
+    const dA = {};
+    sh.forEach((id, i) => { dA[id] = { cd: 'K8022' + (i + 1), jan: janA[i], deadline: '2025/12/23', arrival: '2026/01/24', rounder: '2026/01/26', band: 'パターン1', doukon: '×' }; });
+    const sheetA = {
+      id: 'A', name: '黒丸表A 湿布（1月着）',
+      unitOptions: [4, 5, 6, 7, 8],
+      cats: [{ name: '湿布', productIds: sh.slice(), unitCount: { 4: 4, 5: 5, 6: 5, 7: 5, 8: 5 }, countProducts: { 4: sh.slice(1), 5: sh.slice() }, images: { 4: 'assets/dummy_tanawari_4.png', 5: 'assets/dummy_tanawari_5.png' } }],
+      delivery: dA,
+      units: { '0159': 6, '0164': 4, '0168': 5, '0169': 4, '0171': 5, '0176': 4, '0185': 5, '0187': 5, '0188': 4, '0190': 4, '0192': 5, '0193': 7, '0194': 4, '0196': 5, '0197': 5, '0199': 6, '0200': 5, '0201': 8, '0202': 4, '0204': 4, '0205': 5, '0209': 4, '0215': 5 }
+    };
+    const dB = {};
+    kz.forEach((id, i) => { dB[id] = { cd: 'K8130' + (i + 1), jan: '99999999908' + (20 + i), deadline: '2026/02/13', arrival: '2026/03/07', rounder: '2026/03/09', band: 'パターン2', doukon: '○' }; });
+    ic.forEach((id, i) => { dB[id] = { cd: 'K8131' + (i + 1), jan: '99999999908' + (30 + i), deadline: '2026/02/13', arrival: '2026/03/07', rounder: '2026/03/09', band: 'パターン2', doukon: '×' }; });
+    const sheetB = {
+      id: 'B', name: '黒丸表B 風邪薬＋胃腸薬（3月着）',
+      unitOptions: [4, 5, 6, 7, 8],
+      cats: [
+        { name: '風邪薬', productIds: kz.slice(), unitCount: { 4: 3, 5: 4, 6: 4, 7: 4, 8: 4 }, countProducts: { 3: kz.slice(1), 4: kz.slice() }, images: { 3: 'assets/dummy_tanawari_3.png', 4: 'assets/dummy_tanawari_4.png' } },
+        { name: '胃腸薬', productIds: ic.slice(), unitCount: { 4: 1, 5: 2, 6: 2, 7: 2, 8: 2 }, countProducts: { 1: ic.slice(0, 1), 2: ic.slice() }, images: { 1: 'assets/dummy_tanawari_1.png', 2: 'assets/dummy_tanawari_2.png' } }
+      ],
+      delivery: dB,
+      units: { '0064': 5, '0159': 6, '0168': 4, '0171': 5, '0187': 5, '0192': 4, '0197': 8, '0200': 5, '0202': 4, '0205': 7, '0209': 4, '0215': 5 }
+    };
+    // サツドラ（帳簿サンプルに合わせたデモ小売店）
+    const sStores = [
+      { code: '0001', name: 'みなと薬品 なぎさ店', zip: '400-0001', tel: '0120-100-001', addr: 'デモ県みなと市なぎさ1-1-1' },
+      { code: '0002', name: 'みなと薬品 いそかぜ店', zip: '400-0002', tel: '0120-100-002', addr: 'デモ県みなと市磯風2-2-2' },
+      { code: '0003', name: 'みなと薬品 しおさい店', zip: '400-0003', tel: '0120-100-003', addr: 'デモ県うみのべ市潮騒3-3-3' },
+      { code: '0004', name: 'みなと薬品 まつばら店', zip: '400-0004', tel: '0120-100-004', addr: 'デモ県うみのべ市松原4-4-4' },
+      { code: '0005', name: 'みなと薬品 みはらし店', zip: '400-0005', tel: '0120-100-005', addr: 'デモ県やまて市見晴5-5-5' },
+      { code: '0006', name: 'みなと薬品 かもめ店', zip: '400-0006', tel: '0120-100-006', addr: 'デモ県やまて市鴎6-6-6' }
+    ].map(s => Object.assign({ area: '', bl: '', fax: '', haicd: '0', dept: '' }, s));
+    const sSheet = {
+      id: 'SA', name: '黒丸表A 目薬（1月着）',
+      unitOptions: [4, 5, 6, 7, 8],
+      cats: [{ name: '目薬', productIds: ['0201', '0202'], unitCount: { 4: 1, 5: 2, 6: 2, 7: 2, 8: 2 }, countProducts: { 1: ['0201'], 2: ['0201', '0202'] }, images: { 1: 'assets/dummy_tanawari_1.png', 2: 'assets/dummy_tanawari_2.png' } }],
+      delivery: {
+        '0201': { cd: 'S80201', jan: '9999999990816', deadline: '2026/01/05', arrival: '2026/01/14', rounder: '2026/01/16', band: 'パターン1', doukon: '×' },
+        '0202': { cd: 'S80202', jan: '9999999990817', deadline: '2026/01/05', arrival: '2026/01/14', rounder: '2026/01/16', band: 'パターン1', doukon: '×' }
+      },
+      units: { '0001': 5, '0002': 4, '0003': 5, '0004': 6, '0005': 4, '0006': 5 }
+    };
+    const cloneD = o => JSON.parse(JSON.stringify(o));
+    const realKStores = [
+      { code: '0064', area: 'ドラッグ第二営業部', bl: '三重ブロック', name: '亀山店', zip: '519-0124', addr: '三重県亀山市東御幸町222', tel: '0595-82-7821' },
+      { code: '0147', area: 'ドラッグ第四営業部', bl: '北陸ブロック', name: 'アピタ松任店', zip: '924-0839', addr: '石川県白山市幸明町280', tel: '076-274-6211' },
+      { code: '0156', area: 'ドラッグ第二営業部', bl: '奈良第１ブロック', name: '東押熊店', zip: '631-0011', addr: '奈良県奈良市押熊町557-1', tel: '0742-40-1230' },
+      { code: '0159', area: 'ドラッグ第二営業部', bl: '三重ブロック', name: '名張中央店', zip: '518-0729', addr: '三重県名張市蔵持町原出2006', tel: '0595-61-0330' },
+      { code: '0164', area: 'ドラッグ第二営業部', bl: '大阪南第６ブロック', name: '和泉中央店', zip: '594-0083', addr: '大阪府和泉市池田下町170-1', tel: '0725-51-2551' },
+      { code: '0168', area: 'ドラッグ第二営業部', bl: '大阪南第３ブロック', name: '阪南石田店', zip: '599-0201', addr: '大阪府阪南市石田259', tel: '072-471-8611' },
+      { code: '0169', area: 'ドラッグ第一営業部', bl: '大阪北第４ブロック', name: '沢良宜店', zip: '567-0862', addr: '大阪府茨木市沢良宜浜2-1-6', tel: '072-635-1521' },
+      { code: '0171', area: 'ドラッグ第四営業部', bl: '四国第３ブロック', name: '田宮店', zip: '770-0004', addr: '徳島県徳島市北田宮1-3-5', tel: '088-632-7801' },
+      { code: '0176', area: 'ドラッグ第三営業部', bl: '兵庫第２ブロック', name: '三木店', zip: '673-0433', addr: '兵庫県三木市加佐横塚285-10', tel: '0794-82-7511' },
+      { code: '0185', area: 'ドラッグ第四営業部', bl: '四国第３ブロック', name: '鳴門店', zip: '772-0002', addr: '徳島県鳴門市撫養町黒崎字松島110', tel: '088-685-3211' },
+      { code: '0187', area: 'ドラッグ第一営業部', bl: '大阪北第７ブロック', name: '河内磐船店', zip: '576-0033', addr: '大阪府交野市森北1-17-22', tel: '072-810-3121' },
+      { code: '0188', area: 'ドラッグ第一営業部', bl: '滋賀第３ブロック', name: '栗東店', zip: '520-3031', addr: '滋賀県栗東市霊仙寺3-2-29', tel: '077-554-8021' },
+      { code: '0190', area: 'ドラッグ第二営業部', bl: '三重ブロック', name: '夏見橋店', zip: '518-0441', addr: '三重県名張市夏見字上之出2452', tel: '0595-64-7521' },
+      { code: '0192', area: 'ドラッグ第二営業部', bl: '奈良第１ブロック', name: '生駒店', zip: '630-0246', addr: '奈良県生駒市小明町250-6', tel: '0743-75-6621' },
+      { code: '0193', area: 'ドラッグ第二営業部', bl: '奈良第２ブロック', name: '三和町店', zip: '635-0067', addr: '奈良県大和高田市三和町5-7', tel: '0745-24-8331' },
+      { code: '0194', area: 'ドラッグ第二営業部', bl: '奈良第３ブロック', name: '御所店', zip: '639-2244', addr: '奈良県御所市東松本266-6', tel: '0745-64-2521' },
+      { code: '0196', area: 'ドラッグ第二営業部', bl: '奈良第２ブロック', name: '香芝逢坂店', zip: '639-0252', addr: '奈良県香芝市逢坂8-205-1', tel: '0745-71-3411' },
+      { code: '0197', area: 'ドラッグ第三営業部', bl: '兵庫第２ブロック', name: '小野本町店', zip: '675-1367', addr: '兵庫県小野市本町648-1', tel: '0794-70-1121' },
+      { code: '0199', area: 'ドラッグ第二営業部', bl: '三重ブロック', name: '伊賀上野東店', zip: '518-0835', addr: '三重県伊賀市緑ケ丘南町3948', tel: '0595-26-3211' },
+      { code: '0200', area: 'ドラッグ第一営業部', bl: '滋賀第１ブロック', name: '皇子山店', zip: '520-0025', addr: '滋賀県大津市皇子が丘2-4-1', tel: '077-521-7011' },
+      { code: '0201', area: 'ドラッグ第四営業部', bl: '北陸ブロック', name: '金沢駅西店', zip: '920-0025', addr: '石川県金沢市駅西本町3-2-1', tel: '076-234-5711' },
+      { code: '0202', area: 'ドラッグ第二営業部', bl: '大阪南第４ブロック', name: '北花田店', zip: '591-8002', addr: '大阪府堺市北区北花田町3-18-1', tel: '072-240-3511' },
+      { code: '0204', area: 'ドラッグ第二営業部', bl: '奈良第２ブロック', name: '上牧店', zip: '639-0214', addr: '奈良県北葛城郡上牧町上牧539-1', tel: '0745-76-2711' },
+      { code: '0205', area: 'ドラッグ第四営業部', bl: '四国第２ブロック', name: '鴨島店', zip: '776-0010', addr: '徳島県吉野川市鴨島町鴨島246-1', tel: '0883-22-3711' },
+      { code: '0209', area: 'ドラッグ第一営業部', bl: '大阪北第１ブロック', name: '池田神田店', zip: '563-0031', addr: '大阪府池田市天神1-5-8', tel: '072-750-3011' },
+      { code: '0215', area: 'ドラッグ第一営業部', bl: '滋賀第３ブロック', name: '守山梅田店', zip: '524-0037', addr: '滋賀県守山市梅田町5-11', tel: '077-514-2311' }
+    ].map(s => Object.assign({ fax: '', haicd: '0', dept: '' }, s));
+    const realSStores = [
+      { code: '0001', name: 'サツドラめむろ店', zip: '082-0016', tel: '0155-62-6151', addr: '河西郡芽室町東6条9丁目 ダイイチ内' },
+      { code: '0002', name: 'サツドラ池田店', zip: '083-0033', tel: '015-572-8377', addr: '中川郡池田町字利別南町26番4' },
+      { code: '0003', name: 'サツドラ白樺店', zip: '080-0051', tel: '0155-38-2733', addr: '帯広市白樺16条西2丁目7-7' },
+      { code: '0004', name: 'サツドラ函館美原店', zip: '041-0806', tel: '0138-47-6658', addr: '函館市美原3丁目13番22号' },
+      { code: '0005', name: 'サツドラ西線店', zip: '064-0807', tel: '011-533-2541', addr: '札幌市中央区南7条西15丁目1-6' },
+      { code: '0006', name: 'サツドラ稚内店', zip: '097-0002', tel: '0162-34-9010', addr: '稚内市潮見2丁目5番35号' }
+    ].map(s => Object.assign({ area: '', bl: '', fax: '', haicd: '0', dept: '' }, s));
+    const eyeProducts = [
+      { id: '0201', name: 'スマイルTHE ONE', cat: '目薬', maker: 'ライオン', jan: '9999999990816' },
+      { id: '0202', name: 'サンテFX', cat: '目薬', maker: '参天製薬', jan: '9999999990817' }
+    ];
+    const demoCatNames = ['湿布', '風邪薬', '胃腸薬', '目薬', '鎮痛剤', 'ビタミン剤', '整腸剤'];
+    const demoCats = demoCatNames.map(n => ({ name: n }));
+    const demoProducts = [];
+    const demoSheetCats = [];
+    demoCatNames.forEach((cn, ci) => {
+      const ids = [];
+      for (let i = 1; i <= 5; i++) {
+        const id = 'D' + String(ci + 1) + String(i);
+        ids.push(id);
+        demoProducts.push({ id, name: cn + '商品' + i, cat: cn, maker: 'サンプル製薬', jan: '499000' + (ci + 1) + '00000' + i });
+      }
+      demoSheetCats.push({ name: cn, productIds: ids.slice(), unitCount: { 4: 5, 5: 5, 6: 5, 7: 5, 8: 5 }, countProducts: { 5: ids.slice() } });
+    });
+    const demoStores = cloneD(kStores);
+    const demoUnits = {};
+    demoStores.forEach((s, i) => { if (i % 2 === 0) demoUnits[s.code] = [4, 5, 6, 7, 8][i % 5]; });
+    const demoDelivery = {};
+    demoProducts.forEach(p => { demoDelivery[p.id] = { cd: '', jan: p.jan, deadline: '2026/02/13', arrival: '2026/03/07', rounder: '2026/03/09', band: 'パターン1', doukon: '×' }; });
+    const demoSheet = { id: 'DEMO7', name: '黒丸表 7カテゴリ×5商品（レイアウト確認）', unitOptions: [4, 5, 6, 7, 8], cats: demoSheetCats, delivery: demoDelivery, units: demoUnits };
+
+    return {
+      view: 'sheet', mtab: 'stores', sheetIdx: 0, modal: null, csv: null, detail: {}, menuOpen: false, hoverCell: null,
+      retailerId: 'R1',
+      retailers: [
+        { id: 'R1', name: 'ドラッグひまわり', toknm: 'ドラッグひまわり商品部', dept: '', mkcd: '999', zip: '100-0000', tel: '0120-000-000', fax: '', addr: '見本県さくら市本町1-1-1', ship: { datc: '2', denymd: '2026/01/19', gyono: '1', tokcd: '', event: '販促POP', mknm: 'サンプル販促' }, csvCols: Component.DEFAULT_CSV_COLS() },
+        { id: 'R2', name: 'みなと薬品', toknm: 'みなと薬品 商品部', dept: '', mkcd: '999', zip: '400-0000', tel: '0120-100-000', fax: '', addr: 'デモ県みなと市中央1-1-1', ship: { datc: '2', denymd: '2026/01/19', gyono: '1', tokcd: '', event: '販促POP', mknm: 'サンプル販促' }, csvCols: Component.DEFAULT_CSV_COLS() },
+        { id: 'R3', name: 'キリン堂', toknm: 'キリン堂商品部', dept: '', mkcd: '999', zip: '', tel: '', fax: '', addr: '', ship: { datc: '2', denymd: '', gyono: '1', tokcd: '', event: '販促POP', mknm: '' }, csvCols: Component.DEFAULT_CSV_COLS() },
+        { id: 'R4', name: 'サツドラ', toknm: 'サツドラ商品部', dept: '', mkcd: '999', zip: '060-0908', tel: '011-788-6188', fax: '', addr: '札幌市東区北８条東４丁目１－２０', ship: { datc: '2', denymd: '2026/01/19', gyono: '1', tokcd: '', event: '販促POP', mknm: 'ヘルス' }, csvCols: Component.DEFAULT_CSV_COLS() }
+      ],
+      data: {
+        R1: { masters: { stores: kStores, categories: kCategories.concat(demoCats.filter(c => !kCategories.some(k => k.name === c.name))), products: kProducts.concat(demoProducts) }, sheets: [sheetA, sheetB, demoSheet] },
+        R2: { masters: { stores: sStores, categories: [{ name: '目薬' }], products: cloneD(eyeProducts) }, sheets: [sSheet] },
+        R3: { masters: { stores: realKStores, categories: cloneD(kCategories), products: cloneD(kProducts) }, sheets: [cloneD(sheetA), cloneD(sheetB)] },
+        R4: { masters: { stores: realSStores, categories: [{ name: '目薬' }], products: cloneD(eyeProducts) }, sheets: [cloneD(sSheet)] }
+      },
+      ns: { name: '', mode: 'dup' },
+      pf: { id: '', name: '', cat: '', maker: '', jan: '' },
+      nf: { code: '', name: '', zip: '', addr: '', tel: '' },
+      nc: '', nr: '',
+      shelfImages: {},
+      productThumbs: {},
+      shelfNewVar: {},
+      shelfNewUnit: '',
+      csvColsOpen: false,
+      storeSearch: '', productSearch: '',
+      unitImgStore: null,
+      unitImgFile: null,
+      unitImgPreviewUrl: ''
+    };
+  }
+
+  static DEFAULT_CSV_COLS() {
+    return ['MKCD', 'DATC', 'DENYMD', 'DENNO', 'GYONO', 'TOKCD', 'TOKNM', 'TOKBNM', 'TKPOST', 'TKTEL', 'TKFAX', 'TKADD1', 'TKADD2', 'TKADD3', 'HAICD_1', 'HAICD_2', 'HAINM', 'HAIBNM', 'HAPOST', 'HATEL', 'HAFAX', 'HAIADD1', 'HAIADD2', 'HAIADD3', 'SYOCD1', 'SYOCD2', 'SYONM', 'JAN', 'ITF', 'IRISU', 'PRICE', 'GENKA', 'SKSU', 'SYUYMD', 'MKNM', 'CR'].map(k => ({ key: k, on: true }));
+  }
+  migrateSheets(sheets) {
+    (sheets || []).forEach(sh => { if (!sh.manual) sh.manual = {}; });
+    (sheets || []).forEach(sh => {
+      if (!Array.isArray(sh.unitOptions) || !sh.unitOptions.length) {
+        const set = new Set([4, 5, 6, 7, 8]);
+        (sh.cats || []).forEach(c => Object.keys(c.unitCount || {}).forEach(k => { const n = Number(k); if (n > 0) set.add(n); }));
+        Object.values(sh.units || {}).forEach(n => { if (n > 0) set.add(Number(n)); });
+        sh.unitOptions = [...set].sort((a, b) => a - b);
+      }
+    });
+    (sheets || []).forEach(sh => (sh.cats || []).forEach(c => {
+      if (c.unitCount && c.countProducts) return;
+      const unitCount = {}, countProducts = {};
+      [4, 5, 6, 7, 8].forEach(u => {
+        const ids = (c.rules && c.rules[u]) ? c.rules[u].slice() : (c.productIds || []).slice();
+        const n = ids.length;
+        unitCount[u] = n;
+        if (!countProducts[n]) countProducts[n] = ids;
+      });
+      c.unitCount = unitCount; c.countProducts = countProducts;
+      delete c.rules;
+    }));
+    return sheets;
+  }
+  normalizeMasters(m) {
+    (m.stores || []).forEach(s => { if (s.fax === undefined) s.fax = ''; if (s.haicd === undefined) s.haicd = '0'; if (s.dept === undefined) s.dept = ''; });
+    (m.products || []).forEach(p => { if (p.jan === undefined) p.jan = ''; });
+    return m;
+  }
+  componentDidMount() {
+    try {
+      const raw2 = localStorage.getItem('kuromaru_v3demo');
+      if (raw2) {
+        const d = JSON.parse(raw2);
+        if (d && d.retailers && d.retailers.length && d.data) {
+          d.retailers.forEach(r => { if (!r.ship) r.ship = { datc: '2', denymd: '', gyono: '1', tokcd: '', event: '販促POP', mknm: '' }; if (!r.csvCols) r.csvCols = Component.DEFAULT_CSV_COLS(); });
+          // 保存に含まれない既定小売店（実在データ等）を補完
+          const def = Component.defaults();
+          def.retailers.forEach(dr => { if (!d.retailers.some(x => x.id === dr.id)) { d.retailers.push(dr); d.data[dr.id] = def.data[dr.id]; } });
+          Object.values(d.data).forEach(x => { this.normalizeMasters(x.masters || {}); this.migrateSheets(x.sheets || []); });
+          const rid = d.data[d.retailerId] ? d.retailerId : d.retailers[0].id;
+          this.setState({ retailers: d.retailers, data: d.data, retailerId: rid });
+        }
+      }
+      const imgs = localStorage.getItem('kuromaru_shelfImages_demo');
+      if (imgs) { try { this.setState({ shelfImages: JSON.parse(imgs) }); } catch (e) {} }
+      const th = localStorage.getItem('kuromaru_thumbs_demo');
+      if (th) { try { this.setState({ productThumbs: JSON.parse(th) }); } catch (e) {} }
+    } catch (e) {}
+  }
+  persist() {
+    try { localStorage.setItem('kuromaru_v3demo', JSON.stringify({ retailers: this.state.retailers, retailerId: this.state.retailerId, data: this.state.data })); } catch (e) {}
+    try { localStorage.setItem('kuromaru_shelfImages_demo', JSON.stringify(this.state.shelfImages)); } catch (e) {}
+    try { localStorage.setItem('kuromaru_thumbs_demo', JSON.stringify(this.state.productThumbs)); } catch (e) {}
+  }
+  up(fn) { this.setState(fn, () => this.persist()); }
+  clone(o) { return JSON.parse(JSON.stringify(o)); }
+  // 現在の小売店のデータを複製して編集
+  upD(fn) { this.up(s => { const data = this.clone(s.data); fn(data[s.retailerId], s); return { data }; }); }
+  upR(id, patch) { this.up(s => ({ retailers: s.retailers.map(x => x.id === id ? Object.assign({}, x, patch) : x) })); }
+  curD() { return this.state.data[this.state.retailerId]; }
+
+  // ---- xlsx出力（全セル文字列形式で先頭0を保持） ----
+  crc32(bytes) {
+    let c, crc = 0xFFFFFFFF;
+    if (!Component._crcTable) {
+      Component._crcTable = [];
+      for (let n = 0; n < 256; n++) { c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); Component._crcTable[n] = c >>> 0; }
+    }
+    const t = Component._crcTable;
+    for (let i = 0; i < bytes.length; i++) crc = t[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  buildZip(files) {
+    const enc = new TextEncoder();
+    const chunks = [], central = []; let offset = 0;
+    const u16 = n => [n & 0xFF, (n >>> 8) & 0xFF];
+    const u32 = n => [n & 0xFF, (n >>> 8) & 0xFF, (n >>> 16) & 0xFF, (n >>> 24) & 0xFF];
+    files.forEach(f => {
+      const nameB = enc.encode(f.name);
+      const data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+      const crc = this.crc32(data);
+      const local = [].concat(u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(nameB.length), u16(0));
+      chunks.push(new Uint8Array(local), nameB, data);
+      central.push([].concat(u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(nameB.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset)), nameB);
+      offset += local.length + nameB.length + data.length;
+    });
+    const cStart = offset; let cSize = 0;
+    const centralChunks = [];
+    central.forEach(c => { const arr = c instanceof Uint8Array ? c : new Uint8Array(c); centralChunks.push(arr); cSize += arr.length; });
+    const end = new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cSize), u32(cStart), u16(0)));
+    const all = [].concat(chunks, centralChunks, [end]);
+    let total = 0; all.forEach(a => total += a.length);
+    const out = new Uint8Array(total); let p = 0;
+    all.forEach(a => { out.set(a, p); p += a.length; });
+    return out;
+  }
+  xlsxEsc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  colRef(n) { let s = ''; n++; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+  downloadXlsx(name, header, rows) {
+    // 全セルを inlineStr（文字列型）で出力 → Excelが数値化せず先頭0を保持
+    const allRows = [header].concat(rows);
+    const sheetRows = allRows.map((cells, ri) => {
+      const cs = cells.map((v, ci) => '<c r="' + this.colRef(ci) + (ri + 1) + '" t="inlineStr"><is><t xml:space="preserve">' + this.xlsxEsc(v) + '</t></is></c>').join('');
+      return '<row r="' + (ri + 1) + '">' + cs + '</row>';
+    }).join('');
+    const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' + sheetRows + '</sheetData></worksheet>';
+    const wb = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="発送リスト" sheetId="1" r:id="rId1"/></sheets></workbook>';
+    const wbRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>';
+    const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    const ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>';
+    const zip = this.buildZip([
+      { name: '[Content_Types].xml', data: ct },
+      { name: '_rels/.rels', data: rels },
+      { name: 'xl/workbook.xml', data: wb },
+      { name: 'xl/_rels/workbook.xml.rels', data: wbRels },
+      { name: 'xl/worksheets/sheet1.xml', data: sheet }
+    ]);
+    const blob = new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
+  parseCsv(text) {
+    return text.replace(/^\uFEFF/, '').split(/\r?\n/).map(l => l.trim()).filter(l => l.length)
+      .map(l => l.split(',').map(c => c.trim().replace(/^"(.*)"$/, '$1')));
+  }
+  readCsvFile(file, cb) {
+    const r = new FileReader();
+    r.onload = () => {
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(r.result); }
+      catch (e) { text = new TextDecoder('shift_jis').decode(r.result); }
+      cb(this.parseCsv(text));
+    };
+    r.readAsArrayBuffer(file);
+  }
+  download(name, text) {
+    const blob = new Blob(['\uFEFF' + text], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
+  attachThumb(file, pid) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const needCompress = file.size > 2097152;
+        const maxDim = needCompress ? 900 : 1600;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) { const r = Math.min(maxDim / w, maxDim / h); w = Math.round(w * r); h = Math.round(h * r); }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        let q = needCompress ? 0.8 : 0.92;
+        let out = canvas.toDataURL('image/jpeg', q);
+        while (needCompress && out.length > 2097152 && q > 0.3) { q -= 0.1; out = canvas.toDataURL('image/jpeg', q); }
+        const key = this.state.retailerId + ':' + pid;
+        this.setState({ productThumbs: Object.assign({}, this.state.productThumbs, { [key]: out }) }, () => this.persist());
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  removeThumb(pid) {
+    const key = this.state.retailerId + ':' + pid;
+    const t = Object.assign({}, this.state.productThumbs); delete t[key];
+    this.setState({ productThumbs: t }, () => this.persist());
+  }
+
+  openCsv(type) {
+    const defs = {
+      units: { title: '単位CSV取込（この黒丸表のみ）', note: '形式: 店舗コード,店舗名称,4本,5本,6本,7本,8本 — 該当する単位の列にのみ「1」。複数列に1がある行・どの列にも1がない行・店舗マスタに無い店番はエラーとしてスキップします。', head: ['店舗コード', '店舗名称', '4本', '5本', '6本', '7本', '8本'] },
+      stores: { title: '店舗マスタ CSV取込', note: '形式: 店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード1,部署名,エリア,BL名 — 店番をキーに既存は上書き、新規は追加します（FAX以降は省略可）。', head: ['店番', '店舗名称', '郵便番号', '住所', '電話番号', 'FAX', '配送先コード1', '部署名', 'エリア', 'BL名'] },
+      products: { title: '商品マスタ CSV取込', note: '形式: 商品コード,商品名,商品カテゴリ,製造業者,JANコード — 商品コードをキーに既存は上書き、新規は追加。未登録カテゴリは自動作成します。', head: ['商品コード', '商品名', '商品カテゴリ', '製造業者', 'JANコード'] }
+    };
+    const d = defs[type];
+    this.setState({ modal: 'csv', csv: { type, title: d.title, note: d.note, head: d.head, fileName: 'ファイル未選択', rows: [], errors: [], parsed: null } });
+  }
+
+  processCsv(rows, fileName) {
+    const csv = this.state.csv; if (!csv) return;
+    const M = this.curD().masters;
+    let body = rows;
+    if (body.length && body[0].some(c => /店番|店舗コード|商品コード|商品ID/.test(c))) body = body.slice(1);
+    const prev = [], errors = [];
+    let parsed;
+    if (csv.type === 'units') {
+      parsed = {};
+      body.forEach((r, li) => {
+        const code = (r[0] || '').padStart(4, '0');
+        const flags = [0, 1, 2, 3, 4].map(i => String(r[i + 2] || ''));
+        const ones = flags.map((f, i) => f === '1' ? i : -1).filter(i => i >= 0);
+        let err = '';
+        if (!M.stores.some(s => s.code === code)) err = '店舗マスタに無い店番';
+        else if (ones.length > 1) err = '複数の単位列に「1」';
+        else if (ones.length === 0) err = '単位列に「1」がない';
+        if (!err) parsed[code] = ones[0] + 4;
+        prev.push({ cells: [code, r[1] || '', ...flags].map(t => ({ t })), err, style: err ? 'background:#fbf1ef' : '' });
+        if (err) errors.push({ t: (li + 2) + '行目（店番 ' + code + '）: ' + err });
+      });
+    } else if (csv.type === 'stores') {
+      parsed = [];
+      body.forEach((r, li) => {
+        const code = (r[0] || '').padStart(4, '0');
+        let err = '';
+        if (!r[0] || !r[1]) err = '店番または店舗名称が空';
+        if (!err) parsed.push({ code, name: r[1] || '', zip: r[2] || '', addr: r[3] || '', tel: r[4] || '', fax: r[5] || '', haicd: r[6] || '0', dept: r[7] || '', area: r[8] || '', bl: r[9] || '' });
+        prev.push({ cells: [code, r[1] || '', r[2] || '', r[3] || '', r[4] || '', r[5] || '', r[6] || '', r[7] || '', r[8] || '', r[9] || ''].map(t => ({ t })), err, style: err ? 'background:#fbf1ef' : '' });
+        if (err) errors.push({ t: (li + 2) + '行目: ' + err });
+      });
+    } else {
+      parsed = [];
+      body.forEach((r, li) => {
+        let err = '';
+        if (!r[0] || !r[1]) err = '商品コードまたは商品名が空';
+        if (!err) parsed.push({ id: r[0], name: r[1], cat: r[2] || '未分類', maker: r[3] || '', jan: r[4] || '' });
+        prev.push({ cells: [r[0] || '', r[1] || '', r[2] || '', r[3] || '', r[4] || ''].map(t => ({ t })), err, style: err ? 'background:#fbf1ef' : '' });
+        if (err) errors.push({ t: (li + 2) + '行目: ' + err });
+      });
+    }
+    this.setState({ csv: Object.assign({}, csv, { fileName, rows: prev, errors, parsed }) });
+  }
+
+  applyCsv() {
+    const csv = this.state.csv; if (!csv || !csv.parsed) return;
+    const si = this.state.sheetIdx;
+    if (csv.type === 'units') {
+      this.upD(d => { Object.assign(d.sheets[si].units, csv.parsed); });
+    } else if (csv.type === 'stores') {
+      this.upD(d => {
+        csv.parsed.forEach(row => { const i = d.masters.stores.findIndex(x => x.code === row.code); if (i >= 0) d.masters.stores[i] = row; else d.masters.stores.push(row); });
+      });
+    } else {
+      this.upD(d => {
+        csv.parsed.forEach(row => {
+          if (!d.masters.categories.some(c => c.name === row.cat)) d.masters.categories.push({ name: row.cat });
+          const i = d.masters.products.findIndex(x => x.id === row.id);
+          if (i >= 0) d.masters.products[i] = row; else d.masters.products.push(row);
+        });
+      });
+    }
+    this.setState({ modal: null, csv: null });
+  }
+
+  csvTemplate() {
+    const csv = this.state.csv; if (!csv) return;
+    const M = this.curD().masters, sheet = this.curD().sheets[this.state.sheetIdx];
+    if (csv.type === 'units') {
+      const lines = ['店舗コード,店舗名称,4本,5本,6本,7本,8本'];
+      [...M.stores].sort((a, b) => a.code.localeCompare(b.code)).forEach(st => {
+        const u = sheet.units[st.code];
+        const flags = [4, 5, 6, 7, 8].map(x => u === x ? '1' : '');
+        lines.push([st.code, st.name, ...flags].join(','));
+      });
+      this.download('単位設定_雛形.csv', lines.join('\n'));
+    } else if (csv.type === 'stores') {
+      const lines = ['店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード1,部署名,エリア,BL名'];
+      M.stores.forEach(s => lines.push([s.code, s.name, s.zip, s.addr, s.tel, s.fax || '', s.haicd || '0', s.dept || '', s.area || '', s.bl || ''].join(',')));
+      this.download('店舗マスタ_雛形.csv', lines.join('\n'));
+    } else {
+      const lines = ['商品コード,商品名,商品カテゴリ,製造業者,JANコード'];
+      M.products.forEach(p => lines.push([p.id, p.name, p.cat, p.maker, p.jan || ''].join(',')));
+      this.download('商品マスタ_雛形.csv', lines.join('\n'));
+    }
+  }
+
+  toggleCatInSheet(catName) {
+    const si = this.state.sheetIdx;
+    this.upD(d => {
+      const sh = d.sheets[si];
+      const ix = sh.cats.findIndex(c => c.name === catName);
+      if (ix >= 0) {
+        sh.cats[ix].productIds.forEach(pid => delete sh.delivery[pid]);
+        sh.cats.splice(ix, 1);
+      } else {
+        const pids = d.masters.products.filter(p => p.cat === catName).map(p => p.id);
+        const n = pids.length;
+        const unitCount = {}; (sh.unitOptions || [4, 5, 6, 7, 8]).forEach(u => unitCount[u] = n);
+        const countProducts = {}; countProducts[n] = pids.slice();
+        sh.cats.push({ name: catName, productIds: pids, unitCount, countProducts });
+        pids.forEach(pid => { if (!sh.delivery[pid]) sh.delivery[pid] = { cd: '', jan: '', deadline: '', arrival: '', rounder: '', band: '', doukon: '' }; });
+      }
+    });
+  }
+
+  toggleProdInSheet(catName, pid) {
+    const si = this.state.sheetIdx;
+    this.upD(d => {
+      const sh = d.sheets[si];
+      const c = sh.cats.find(x => x.name === catName); if (!c) return;
+      const masterIds = d.masters.products.filter(p => p.cat === catName).map(p => p.id);
+      const set = new Set(c.productIds);
+      if (set.has(pid)) { set.delete(pid); delete sh.delivery[pid]; }
+      else { set.add(pid); if (!sh.delivery[pid]) sh.delivery[pid] = { cd: '', jan: '', deadline: '', arrival: '', rounder: '', band: '', doukon: '' }; }
+      c.productIds = masterIds.filter(id => set.has(id));
+      if (!c.countProducts) c.countProducts = {};
+      Object.keys(c.countProducts).forEach(k => { c.countProducts[k] = c.productIds.filter(id => c.countProducts[k].includes(id)); });
+    });
+  }
+
+  fmtYMD(s) { const m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec((s || '').trim()); return m ? m[1] + m[2].padStart(2, '0') + m[3].padStart(2, '0') : ''; }
+
+  renderVals() {
+    const S = this.state;
+    const r = S.retailers.find(x => x.id === S.retailerId) || S.retailers[0];
+    const D = S.data[r.id] || { masters: { stores: [], categories: [], products: [] }, sheets: [] };
+    const M = D.masters, sheets = D.sheets;
+    const si = Math.max(0, Math.min(S.sheetIdx, sheets.length - 1));
+    const sheet = sheets[si] || { id: 'X', name: '', cats: [], delivery: {}, units: {}, unitOptions: [4, 5, 6, 7, 8] };
+    const CIRC = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫'];
+    const pById = id => M.products.find(p => p.id === id) || { id, name: id, cat: '', jan: '' };
+    const byCode = (a, b) => a.code.localeCompare(b.code);
+    const storesSorted = [...M.stores].sort(byCode);
+    const hidden = sheet.hiddenStores || {};
+    const zebra = i => (i % 2 ? 'background:#fbfaf7;' : 'background:#fff;');
+    const tabStyle = on => 'padding:6px 18px;font-size:12.5px;cursor:pointer;border-radius:16px;' + (on ? 'border:1px solid #1e6a41;background:#1e6a41;color:#fff;font-weight:600' : 'border:1px solid #ddd9d0;background:#fff;color:#666');
+
+    // ---- ナビ / メニュー ----
+    const mtabNames = { retailers: '小売店', stores: '店舗', products: '商品', cats: '商品カテゴリ' };
+    const goto = (view, mtab) => this.setState({ view, mtab: mtab || S.mtab, menuOpen: false, modal: null, csv: null });
+    const crumbStyle = clickable => 'cursor:' + (clickable ? 'pointer' : 'default') + ';' + (clickable ? 'text-decoration:underline' : '');
+    let crumbItems;
+    if (S.view === 'master') {
+      crumbItems = [
+        { sep: '', label: 'マスタ', style: crumbStyle(true), onClick: () => goto('master', S.mtab) },
+        { sep: ' › ', label: mtabNames[S.mtab] || '', style: crumbStyle(false), onClick: () => {} }
+      ];
+    } else {
+      crumbItems = [
+        { sep: '', label: r.name, style: crumbStyle(true), onClick: () => goto('sheet') },
+        { sep: ' › ', label: '黒丸表', style: crumbStyle(S.view !== 'sheet'), onClick: () => goto('sheet') }
+      ];
+      if (S.view === 'shiplist') crumbItems.push({ sep: ' › ', label: '発送リスト', style: crumbStyle(false), onClick: () => {} });
+    }
+    const navBtnStyle = active => 'border:none;background:' + (active ? 'rgba(255,255,255,.18)' : 'transparent') + ';color:#fff;font-size:12.5px;padding:7px 12px;border-radius:5px;cursor:pointer;font-weight:' + (active ? '700' : '400');
+    const masterItemStyle = active => 'display:block;width:100%;text-align:left;border:none;background:' + (active ? '#eef3ec' : 'transparent') + ';color:' + (active ? '#1e5232' : '#444') + ';font-weight:' + (active ? '700' : '400') + ';font-size:12.5px;padding:7px 10px;border-radius:4px;cursor:pointer;margin:1px 0';
+    const sheetOpts = sheets.map((sh, i) => ({ v: String(i), t: sh.name }));
+
+    const cats = sheet.cats;
+    const manual = sheet.manual || {};
+    const prodsForUnit = (c, u) => { if (c.useShelf === false) return []; const n = u ? (c.unitCount || {})[u] : 0; return n ? ((c.countProducts || {})[n] || []) : []; };
+    const cell = (c, pid, u) => prodsForUnit(c, u).includes(pid);
+    const markedManual = (code, pid) => !!(manual[code] && manual[code].marks && manual[code].marks[pid]);
+    const cellAny = (c, pid, code) => { const u = sheet.units[code]; return u ? cell(c, pid, u) : markedManual(code, pid); };
+    const cntFor = (c, pid) => storesSorted.filter(st => !hidden[st.code] && cellAny(c, pid, st.code)).length;
+
+    const colCats = cats.map(c => ({ name: c.name, n: c.productIds.length }));
+    const hvCol = S.hoverCell ? S.hoverCell.ci : -1;
+    let cpIdx = -1;
+    const colProds = cats.flatMap(c => c.productIds.map((pid, i) => { cpIdx++; return { no: CIRC[i], name: pById(pid).name, bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f0eee8', bg: cpIdx === hvCol ? '#dbe9db' : '#faf9f6' }; }));
+    const totals = cats.flatMap(c => c.productIds.map((pid, i) => ({ v: String(cntFor(c, pid)), bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f0eee8' })));
+    const grandTotal = totals.reduce((a, t) => a + Number(t.v), 0);
+
+    const hasUnitCol = cats.length === 0 || cats.some(c => c.useShelf !== false);
+    const storeColSpan = hasUnitCol ? 4 : 3;
+    const storeColSpanFull = storeColSpan + 1;
+    const firstCols = {}; { let k = -1; cats.forEach(c => c.productIds.forEach((pid, i) => { k++; if (i === 0) firstCols[k] = true; })); }
+    const catDivOf = ci => firstCols[ci] ? 'border-left:2px solid #cfcabd;' : '';
+    const gridRows = storesSorted.map((st, ri) => {
+      const u = hasUnitCol ? sheet.units[st.code] : undefined;
+      const mrow = manual[st.code] || { expand: '', marks: {} };
+      const hv = S.hoverCell;
+      const rowHot = hv && hv.ri === ri;
+      const hoverBg = (ci) => { const colHot = hv && hv.ci === ci; if (rowHot && colHot) return 'background:#dbe9db;'; if (rowHot || colHot) return 'background:#eef4ec;'; return ''; };
+      const onEnter = ci => () => { const h = this.state.hoverCell; if (!h || h.ri !== ri || h.ci !== ci) this.setState({ hoverCell: { ri, ci } }); };
+      const onLeave = () => { if (this.state.hoverCell) this.setState({ hoverCell: null }); };
+      let ci = -1;
+      let cells;
+      if (u) {
+        cells = cats.flatMap(c => c.productIds.map(pid => { ci++; const cc = ci; return { m: cell(c, pid, u) ? '●' : '', onClick: () => {}, onMouseEnter: onEnter(cc), onMouseLeave: onLeave, style: catDivOf(cc) + hoverBg(cc) }; }));
+      } else {
+        cells = cats.flatMap(c => c.productIds.map(pid => {
+          ci++; const cc = ci;
+          const on = !!(mrow.marks && mrow.marks[pid]);
+          return {
+            m: on ? '●' : '',
+            style: 'cursor:pointer;' + catDivOf(cc) + hoverBg(cc) + (on ? 'color:#1e5232' : 'color:#ddd'),
+            onMouseEnter: onEnter(cc), onMouseLeave: onLeave,
+            onClick: () => this.upD(d => {
+              const shx = d.sheets[si];
+              if (!shx.manual) shx.manual = {};
+              if (!shx.manual[st.code]) shx.manual[st.code] = { expand: '', marks: {} };
+              if (!shx.manual[st.code].marks) shx.manual[st.code].marks = {};
+              shx.manual[st.code].marks[pid] = !shx.manual[st.code].marks[pid];
+            })
+          };
+        }));
+      }
+      const marks = cells.filter(x => x.m).length;
+      const expandNum = u ? marks : (mrow.expand === '' || mrow.expand === undefined ? null : Number(mrow.expand));
+      const mismatch = !u && expandNum !== null && expandNum !== marks;
+      return {
+        code: st.code, name: st.name,
+        rowTotal: u ? String(marks) : (expandNum !== null ? String(expandNum) : (marks ? String(marks) : '—')),
+        unitVal: u ? String(u) : '', expand: u ? String(marks) : (mrow.expand !== '' && mrow.expand !== undefined ? String(mrow.expand) : '—'),
+        manual: !u, notManual: !!u,
+        expandVal: mrow.expand !== undefined ? String(mrow.expand) : '',
+        expandStyle: mismatch ? 'color:#a04030;font-weight:700' : 'color:#777',
+        onExpand: e => {
+          const v = e.target.value;
+          this.upD(d => {
+            const shx = d.sheets[si];
+            if (!shx.manual) shx.manual = {};
+            if (!shx.manual[st.code]) shx.manual[st.code] = { expand: '', marks: {} };
+            shx.manual[st.code].expand = v;
+          });
+        },
+        style: (rowHot ? 'background:#eef4ec;' : zebra(ri)) + (hidden[st.code] ? 'opacity:.45;' : ''),
+        fixBg: rowHot ? '#eef4ec' : (ri % 2 ? '#fbfaf7' : '#fff'),
+        onUnit: e => {
+          const v = e.target.value;
+          this.upD(d => { if (v) d.sheets[si].units[st.code] = Number(v); else delete d.sheets[si].units[st.code]; });
+        },
+        cells,
+        visChecked: !hidden[st.code],
+        dimStyle: hidden[st.code] ? 'color:#bbb' : '',
+        onToggleHide: () => this.upD(d => {
+          const shx = d.sheets[si];
+          if (!shx.hiddenStores) shx.hiddenStores = {};
+          if (shx.hiddenStores[st.code]) delete shx.hiddenStores[st.code]; else shx.hiddenStores[st.code] = true;
+        })
+      };
+    });
+
+    const headerProds = [];
+    let hpIdx = -1;
+    const catShelf = cats.map(c => {
+      c.productIds.forEach((pid, i) => {
+        hpIdx++;
+        const p = pById(pid); const d = sheet.delivery[pid] || {};
+        const tsrc = S.productThumbs[r.id + ':' + pid] || '';
+        const tEl = tsrc ? React.createElement('img', { src: tsrc, style: { width: '38px', height: '38px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd9d0', margin: '0 auto 4px', display: 'block' } }) : null;
+        headerProds.push({ no: CIRC[i], name: p.name, cd: d.cd || '—', jan: p.jan || d.jan || '—', cnt: cntFor(c, pid) + '店', deadline: d.deadline || '—', arrival: d.arrival || '—', rounder: d.rounder || '—', band: (d.band || '—') + ' / 販促' + (d.doukon || '—'), note: d.note || '—', bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f7f5f0', hasThumb: !!tsrc, thumbEl: tEl });
+      });
+      const groups = [];
+      (sheet.unitOptions || [4, 5, 6, 7, 8]).forEach(u => {
+        const n = (c.unitCount || {})[u] || 0; const key = String(n);
+        const g = groups.find(x => x.key === key);
+        if (g) g.units.push(u); else groups.push({ key, units: [u], count: n, ids: (c.countProducts || {})[n] || [] });
+      });
+      const ruleLines = groups.map(g => ({ t: g.units.join('・') + '本単位 → 棚割り数 ' + g.count + '（' + g.ids.map(id => CIRC[c.productIds.indexOf(id)]).join('') + '）' }));
+      const images = groups.filter(g => g.count > 0).map(g => {
+        const imgKey = sheet.id + ':' + c.name + ':count:' + g.count;
+        const src = S.shelfImages[imgKey] || (c.images && c.images[g.count]) || '';
+        const openImg = () => this.setState({ modal: 'unitimg', unitImgStore: { kind: 'count', cat: c.name, count: g.count, name: c.name + ' 棚割り数' + g.count } });
+        const imgEl = src ? React.createElement('img', { src, alt: '棚割りイメージ', onClick: openImg, style: { height: '56px', maxWidth: '320px', objectFit: 'contain', border: '1px solid #e0ddd5', background: '#fff', display: 'block', cursor: 'pointer' } }) : null;
+        return { label: '棚割り数' + g.count + '（' + g.units.join('・') + '本）', imgEl, has: !!src, ph: !src, onImg: openImg, onEmpty: openImg };
+      });
+      return { name: c.name, ruleLines, images };
+    });
+    const headerDetailOpen = !!S.detail.__all__;
+
+    const shelfCats = cats.map((c, ci) => {
+      const variations = Object.keys(c.countProducts || {}).map(Number).filter(n => n > 0).sort((a, b) => a - b);
+      const storeUnits = storesSorted.map(st => sheet.units[st.code]).filter(Boolean);
+      const unitList = [...new Set((sheet.unitOptions || []).concat(storeUnits))].filter(n => n > 0).sort((a, b) => a - b);
+      const unitRows = unitList.map(u => {
+        const usedByStores = storeUnits.filter(x => x === u).length;
+        return {
+          label: u + '本単位',
+          inStore: usedByStores > 0 ? (usedByStores + '店で使用') : '',
+          countVal: (c.unitCount || {})[u] ? String((c.unitCount || {})[u]) : '',
+          onCount: e => {
+            const v = parseInt(e.target.value, 10);
+            this.upD(d => {
+              const cc = d.sheets[si].cats.find(x => x.name === c.name);
+              if (!cc.unitCount) cc.unitCount = {}; if (!cc.countProducts) cc.countProducts = {};
+              const nn = v > 0 ? v : 0;
+              cc.unitCount[u] = nn;
+              if (nn > 0 && !cc.countProducts[nn]) cc.countProducts[nn] = cc.productIds.slice(0, Math.min(nn, cc.productIds.length));
+            });
+          },
+          onDelUnit: () => {
+            const used = storesSorted.filter(st => sheet.units[st.code] === u).length;
+            if (!confirm(u + '本単位を削除しますか？' + (used ? '（' + used + '店の割当も解除されます）' : ''))) return;
+            this.upD(d => {
+              const shx = d.sheets[si];
+              shx.unitOptions = (shx.unitOptions || []).filter(x => x !== u);
+              shx.cats.forEach(cc => { if (cc.unitCount) delete cc.unitCount[u]; });
+              Object.keys(shx.units).forEach(code => { if (shx.units[code] === u) delete shx.units[code]; });
+            });
+          }
+        };
+      });
+      const countRows = variations.map(n => {
+        const sel = (c.countProducts || {})[n] || [];
+        const ik = sheet.id + ':' + c.name + ':count:' + n;
+        const img = S.shelfImages[ik] || (c.images && c.images[n]) || '';
+        const openImg = () => this.setState({ modal: 'unitimg', unitImgStore: { kind: 'count', cat: c.name, count: n, name: c.name + ' 棚割り数' + n } });
+        return {
+          count: n,
+          usedBy: unitList.filter(u => ((c.unitCount || {})[u] || 0) === n).map(u => u + '本').join('・') || '（未割当）',
+          selLabel: sel.length + ' / ' + n,
+          warn: sel.length !== n,
+          warnStyle: sel.length !== n ? 'color:#a86a1f;font-weight:700' : 'color:#999',
+          hasImg: !!img, noImg: !img,
+          imgEl: img ? React.createElement('img', { src: img, title: 'クリックで差し替え', onClick: openImg, style: { height: '52px', maxWidth: '150px', objectFit: 'contain', border: '1px solid #ddd9d0', borderRadius: '4px', background: '#fff', display: 'block', cursor: 'pointer' } }) : null,
+          onImg: openImg,
+          onDelVar: () => {
+            if (!confirm('棚割り数 ' + n + ' のバリエーションを削除しますか？（この数を割り当てた単位は「送らない」に戻ります）')) return;
+            this.upD(d => {
+              const cc = d.sheets[si].cats.find(x => x.name === c.name);
+              delete cc.countProducts[n];
+              Object.keys(cc.unitCount || {}).forEach(u => { if (cc.unitCount[u] === n) cc.unitCount[u] = 0; });
+            });
+          },
+          checks: c.productIds.map((pid, i) => ({
+            label: CIRC[i] + ' ' + pById(pid).name,
+            on: sel.includes(pid),
+            onToggle: () => this.upD(d => {
+              const cc = d.sheets[si].cats.find(x => x.name === c.name);
+              if (!cc.countProducts) cc.countProducts = {};
+              let arr = cc.countProducts[n] || [];
+              if (arr.includes(pid)) arr = arr.filter(x => x !== pid); else arr.push(pid);
+              cc.countProducts[n] = cc.productIds.filter(p2 => arr.includes(p2));
+            })
+          }))
+        };
+      });
+      const nvVal = S.shelfNewVar[c.name] || '';
+      const useShelf = c.useShelf !== false;
+      return {
+        name: c.name, unitRows, countRows,
+        useShelf, notUseShelf: !useShelf,
+        onToggleUse: () => this.upD(d => { const cc = d.sheets[si].cats.find(x => x.name === c.name); cc.useShelf = !(cc.useShelf !== false); }),
+        switchTrackStyle: 'display:inline-block;width:34px;height:19px;border-radius:10px;position:relative;transition:background .15s;' + (useShelf ? 'background:#1e6a41' : 'background:#d8d5cc'),
+        switchThumbStyle: 'position:absolute;top:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:left .15s;left:' + (useShelf ? '17px' : '2px'),
+        newUnitVal: S.shelfNewUnit,
+        onNewUnit: e => this.setState({ shelfNewUnit: e.target.value }),
+        onAddUnit: () => {
+          const u = parseInt(this.state.shelfNewUnit, 10);
+          if (!u || u < 1) { alert('1以上の単位（本数）を入力してください'); return; }
+          if ((sheet.unitOptions || []).includes(u)) { alert(u + '本単位は既にあります'); return; }
+          this.upD(d => { d.sheets[si].unitOptions = [...new Set((d.sheets[si].unitOptions || []).concat(u))].sort((a, b) => a - b); });
+          this.setState({ shelfNewUnit: '' });
+        },
+        hasWarn: countRows.some(x => x.warn),
+        noVar: variations.length === 0,
+        newVarVal: nvVal,
+        onNewVar: e => { const v = e.target.value; this.setState({ shelfNewVar: Object.assign({}, this.state.shelfNewVar, { [c.name]: v }) }); },
+        onAddVar: () => {
+          const n = parseInt(this.state.shelfNewVar[c.name], 10);
+          if (!n || n < 1) { alert('1以上の棚割り数を入力してください'); return; }
+          if ((c.countProducts || {})[n]) { alert('棚割り数 ' + n + ' は既にあります'); return; }
+          this.upD(d => {
+            const cc = d.sheets[si].cats.find(x => x.name === c.name);
+            if (!cc.countProducts) cc.countProducts = {};
+            cc.countProducts[n] = cc.productIds.slice(0, Math.min(n, cc.productIds.length));
+          });
+          this.setState({ shelfNewVar: Object.assign({}, this.state.shelfNewVar, { [c.name]: '' }) });
+        }
+      };
+    });
+
+    const pmCats = M.categories.map(mc => {
+      const inSheet = cats.find(c => c.name === mc.name);
+      return {
+        name: mc.name, on: !!inSheet,
+        onToggle: () => this.toggleCatInSheet(mc.name),
+        prods: M.products.filter(p => p.cat === mc.name).map(p => ({
+          name: p.name,
+          on: !!(inSheet && inSheet.productIds.includes(p.id)),
+          dis: !inSheet,
+          onToggle: () => this.toggleProdInSheet(mc.name, p.id)
+        }))
+      };
+    });
+
+    const fieldStyle = w => 'width:' + w + 'px;font-size:11.5px;padding:3px 5px;border:1px solid #ddd9d0;border-radius:3px;box-sizing:border-box';
+    const dmCats = cats.map(c => ({
+      name: c.name,
+      rows: c.productIds.map((pid, i) => {
+        const d = sheet.delivery[pid] || {};
+        const setField = (key, v) => this.upD(dd => { const rec = dd.sheets[si].delivery[pid] || (dd.sheets[si].delivery[pid] = {}); rec[key] = v; });
+        const f = (key, w) => ({ isText: true, isCheck: false, v: d[key] || '', style: fieldStyle(w), oc: e => setField(key, e.target.value) });
+        const fCheck = key => ({ isCheck: true, isText: false, checked: d[key] === '○', oc: e => setField(key, e.target.checked ? '○' : '×') });
+        const thumbSrc = S.productThumbs[r.id + ':' + pid] || '';
+        const thumbEl = thumbSrc ? React.createElement('img', { src: thumbSrc, style: { width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd9d0', display: 'block' } }) : null;
+        return { no: CIRC[i], name: pById(pid).name, hasThumb: !!thumbSrc, thumbEl, thumbLabel: thumbSrc ? '変更' : '＋ 追加', onThumb: e => { const file = e.target.files && e.target.files[0]; if (file) this.attachThumb(file, pid); }, onRemoveThumb: () => this.removeThumb(pid), fields: [f('cd', 76), f('deadline', 92), f('arrival', 92), f('rounder', 92), f('jan', 118), f('band', 84), fCheck('doukon'), f('note', 160)] };
+      })
+    }));
+
+    // ---- 発送リスト（帳簿） ----
+    const ship = r.ship || {};
+    const shipRows = [];
+    sheets.forEach(sh => {
+      sh.cats.forEach(c => {
+        c.productIds.forEach((pid, pi) => {
+          const p = pById(pid); const dl = sh.delivery[pid] || {};
+          [...M.stores].sort(byCode).forEach(st => {
+            const u = sh.units[st.code];
+            let ok;
+            if (u) { const n = (c.unitCount || {})[u] || 0; ok = n > 0 && ((c.countProducts || {})[n] || []).includes(pid); }
+            else { const mrow = (sh.manual || {})[st.code]; ok = !!(mrow && mrow.marks && mrow.marks[pid]); }
+            if (!ok) return;
+            shipRows.push({ st, p, circ: CIRC[pi], cat: c.name, sheetName: sh.name, arrival: dl.arrival || '', jan: p.jan || dl.jan || '' });
+          });
+        });
+      });
+    });
+    const syonmFor = row => row.p.id + (ship.event || '販促POP') + ' ' + row.cat + row.circ + row.p.name;
+    const csvCols = (r.csvCols && r.csvCols.length ? r.csvCols : Component.DEFAULT_CSV_COLS());
+    const activeKeys = csvCols.filter(c => c.on).map(c => c.key);
+    const valuesFor = (row, i, denymd) => {
+      const st = row.st;
+      return {
+        MKCD: r.mkcd || '999', DATC: ship.datc || '2', DENYMD: denymd, DENNO: String(i + 1), GYONO: ship.gyono || '1',
+        TOKCD: ship.tokcd || '', TOKNM: r.toknm || r.name, TOKBNM: r.dept || '', TKPOST: r.zip || '', TKTEL: r.tel || '', TKFAX: r.fax || '', TKADD1: r.addr || '', TKADD2: '', TKADD3: '',
+        HAICD_1: st.haicd || '0', HAICD_2: '0', HAINM: st.name, HAIBNM: st.dept || '', HAPOST: st.zip || '', HATEL: st.tel || '', HAFAX: st.fax || '', HAIADD1: st.addr || '', HAIADD2: '', HAIADD3: '',
+        SYOCD1: row.p.id, SYOCD2: '', SYONM: syonmFor(row), JAN: row.jan, ITF: '', IRISU: '', PRICE: '', GENKA: '', SKSU: '1', SYUYMD: this.fmtYMD(row.arrival), MKNM: ship.mknm || '', CR: 'CR'
+      };
+    };
+    const previewDenymd = this.fmtYMD(ship.denymd) || '';
+    const shHead = activeKeys.map(k => ({ t: k }));
+    const shRows = shipRows.map((row, i) => ({
+      style: zebra(i),
+      cells: activeKeys.map(k => ({ t: String(valuesFor(row, i, previewDenymd)[k] ?? '') }))
+    }));
+    const canExport = shipRows.length > 0 && !!this.fmtYMD(ship.denymd);
+    const upShip = (key, v) => this.upR(r.id, { ship: Object.assign({}, ship, { [key]: v }) });
+    const exportCsv = () => {
+      if (!shipRows.length) { alert('●が1件もありません'); return; }
+      const denymd = this.fmtYMD(ship.denymd);
+      if (!denymd) { alert('伝票日付を YYYY/MM/DD 形式で入力してください'); return; }
+      if (!activeKeys.length) { alert('出力する項目を1つ以上選んでください'); return; }
+      const lines = [activeKeys.join(',')];
+      shipRows.forEach((row, i) => {
+        const values = valuesFor(row, i, denymd);
+        lines.push(activeKeys.map(k => { const x = values[k] !== undefined ? String(values[k]) : ''; return /[",\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; }).join(','));
+      });
+      this.download('発送リスト_' + r.name + '_' + denymd + '.csv', lines.join('\n'));
+    };
+    const exportXlsx = () => {
+      if (!shipRows.length) { alert('●が1件もありません'); return; }
+      const denymd = this.fmtYMD(ship.denymd);
+      if (!denymd) { alert('伝票日付を YYYY/MM/DD 形式で入力してください'); return; }
+      if (!activeKeys.length) { alert('出力する項目を1つ以上選んでください'); return; }
+      const rows = shipRows.map((row, i) => { const values = valuesFor(row, i, denymd); return activeKeys.map(k => values[k] !== undefined ? String(values[k]) : ''); });
+      this.downloadXlsx('発送リスト_' + r.name + '_' + denymd + '.xlsx', activeKeys, rows);
+    };
+    const csvColSources = {
+      MKCD: '小売店マスタ・固定', DATC: 'この画面で入力', DENYMD: 'この画面で入力', DENNO: '自動連番', GYONO: 'この画面で入力', TOKCD: 'この画面で入力',
+      TOKNM: '小売店マスタ・得意先名', TOKBNM: '小売店マスタ・部署名', TKPOST: '小売店マスタ・郵便番号', TKTEL: '小売店マスタ・電話番号', TKFAX: '小売店マスタ・FAX', TKADD1: '小売店マスタ・住所1', TKADD2: '空欄固定', TKADD3: '空欄固定',
+      HAICD_1: '店舗マスタ', HAICD_2: '固定値 0', HAINM: '店舗マスタ', HAIBNM: '店舗マスタ', HAPOST: '店舗マスタ', HATEL: '店舗マスタ', HAFAX: '店舗マスタ', HAIADD1: '店舗マスタ', HAIADD2: '空欄固定', HAIADD3: '空欄固定',
+      SYOCD1: '商品マスタ', SYOCD2: '空欄固定', SYONM: '商品名+イベント名等 連結', JAN: '商品マスタ/配送情報', ITF: '空欄固定', IRISU: '空欄固定', PRICE: '空欄固定', GENKA: '空欄固定', SKSU: '固定値 1', SYUYMD: '黒丸表の配送情報「店舗着」', MKNM: 'この画面で入力', CR: '固定値 CR'
+    };
+    const reorderCsvCols = (from, to) => {
+      if (from === to) return;
+      this.upR(r.id, { csvCols: (() => { const arr = csvCols.slice(); const [item] = arr.splice(from, 1); arr.splice(to, 0, item); return arr; })() });
+    };
+    const btnStyle = dis => 'border:1px solid #ddd9d0;background:' + (dis ? '#f4f3ef' : '#fff') + ';color:' + (dis ? '#ccc' : '#444') + ';border-radius:3px;font-size:11px;width:24px;height:24px;line-height:1;cursor:' + (dis ? 'not-allowed' : 'pointer') + ';flex-shrink:0;pointer-events:auto';
+    const csvColItems = csvCols.map((c, i) => ({
+      key: c.key, on: c.on,
+      source: c.custom ? '空の追加項目' : (csvColSources[c.key] || ''),
+      style: 'display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:4px;background:' + (c.on ? '#f4f7f3' : '#faf9f6'),
+      isFirst: i === 0, isLast: i === csvCols.length - 1,
+      upStyle: btnStyle(i === 0), downStyle: btnStyle(i === csvCols.length - 1),
+      onToggle: () => this.upR(r.id, { csvCols: csvCols.map((x, xi) => xi === i ? Object.assign({}, x, { on: !x.on }) : x) }),
+      onKeyChange: e => { const v = e.target.value; this.upR(r.id, { csvCols: csvCols.map((x, xi) => xi === i ? Object.assign({}, x, { key: v }) : x) }); },
+      onUp: e => { e.stopPropagation(); if (i > 0) reorderCsvCols(i, i - 1); },
+      onDown: e => { e.stopPropagation(); if (i < csvCols.length - 1) reorderCsvCols(i, i + 1); },
+      onDel: () => { if (!confirm('項目「' + c.key + '」を削除しますか？')) return; this.upR(r.id, { csvCols: csvCols.filter((x, xi) => xi !== i) }); }
+    }));
+
+    // ---- マスタ ----
+    const retailerRows = S.retailers.map((x, i) => {
+      const f = key => e => this.upR(x.id, { [key]: e.target.value });
+      return {
+        name: x.name, toknm: x.toknm || '', dept: x.dept || '', mkcd: x.mkcd || '', zip: x.zip || '', tel: x.tel || '', fax: x.fax || '', addr: x.addr || '',
+        style: zebra(i) + (x.id === r.id ? 'outline:2px solid #dfe9df;outline-offset:-2px;' : ''),
+        onName: f('name'), onToknm: f('toknm'), onDept: f('dept'), onMkcd: f('mkcd'), onZip: f('zip'), onTel: f('tel'), onFax: f('fax'), onAddr: f('addr'),
+        canDel: S.retailers.length > 1,
+        onDel: () => {
+          if (S.retailers.length <= 1) return;
+          if (!confirm('「' + x.name + '」を削除しますか？（店舗・商品・黒丸表もすべて削除されます）')) return;
+          this.up(s => {
+            const retailers = s.retailers.filter(y => y.id !== x.id);
+            const data = this.clone(s.data); delete data[x.id];
+            const retailerId = s.retailerId === x.id ? retailers[0].id : s.retailerId;
+            return { retailers, data, retailerId, sheetIdx: 0 };
+          });
+        }
+      };
+    });
+
+    const sSearchQ = (S.storeSearch || '').trim().toLowerCase();
+    const storeRowsAll = storesSorted.map((s, i) => {
+      const idx = M.stores.findIndex(x => x.code === s.code);
+      const f = key => e => { const v = e.target.value; this.upD(d => { d.masters.stores[idx][key] = v; }); };
+      return {
+        code: s.code, name: s.name, zip: s.zip, addr: s.addr, tel: s.tel, fax: s.fax || '', haicd: s.haicd || '0', dept: s.dept || '', area: s.area || '—', bl: s.bl || '—',
+        style: zebra(i),
+        onCode: e => {
+          const v = e.target.value.trim();
+          if (!v) return;
+          if (v !== s.code && M.stores.some(x => x.code === v)) { alert('店番 ' + v + ' は既に使われています'); return; }
+          this.upD(d => {
+            d.masters.stores[idx].code = v;
+            d.sheets.forEach(sh => { if (sh.units[s.code] !== undefined) { sh.units[v] = sh.units[s.code]; delete sh.units[s.code]; } });
+          });
+        },
+        onName: f('name'), onZip: f('zip'), onAddr: f('addr'), onTel: f('tel'), onFax: f('fax'), onHaicd: f('haicd'), onDept: f('dept'),
+        onDel: () => {
+          if (!confirm('店舗「' + s.name + '」（店番 ' + s.code + '）を削除しますか？各黒丸表の単位割当も解除されます。')) return;
+          this.upD(d => {
+            d.masters.stores = d.masters.stores.filter(x => x.code !== s.code);
+            d.sheets.forEach(sh => { delete sh.units[s.code]; });
+          });
+        }
+      };
+    });
+    const storeRows = sSearchQ ? storeRowsAll.filter(s => [s.code, s.name, s.addr, s.area, s.bl, s.zip, s.tel].join(' ').toLowerCase().includes(sSearchQ)) : storeRowsAll;
+    const catOpts = M.categories.map(c => ({ name: c.name }));
+    const pSearchQ = (S.productSearch || '').trim().toLowerCase();
+    const productRowsAll = M.products.map((p, i) => {
+      const idx = M.products.findIndex(x => x.id === p.id);
+      const f = key => e => { const v = e.target.value; this.upD(d => { d.masters.products[idx][key] = v; }); };
+      return {
+        id: p.id, name: p.name, cat: p.cat, maker: p.maker, jan: p.jan || '', style: zebra(i),
+        onName: f('name'), onMaker: f('maker'), onJan: f('jan'), onCat: f('cat')
+      };
+    });
+    const productRows = pSearchQ ? productRowsAll.filter(p => [p.id, p.name, p.cat, p.maker, p.jan].join(' ').toLowerCase().includes(pSearchQ)) : productRowsAll;
+    const catRows = M.categories.map((c, i) => {
+      const count = M.products.filter(p => p.cat === c.name).length;
+      const usedInSheet = sheets.some(sh => sh.cats.some(x => x.name === c.name));
+      const canDel = count === 0 && !usedInSheet;
+      return {
+        name: c.name, count: String(count), canDel, inUse: !canDel, style: zebra(i),
+        onDel: () => this.upD(d => { d.masters.categories = d.masters.categories.filter(x => x.name !== c.name); })
+      };
+    });
+
+    const csv = S.csv;
+    const okCount = csv ? csv.rows.filter(x => !x.err).length : 0;
+    const ngCount = csv ? csv.rows.filter(x => x.err).length : 0;
+    const canApply = !!(csv && csv.parsed && okCount > 0);
+    const unitSet = Object.keys(sheet.units).filter(c => storesSorted.some(s => s.code === c)).length;
+
+    return {
+      // ナビ
+      masterMenuOpen: !!S.masterMenuOpen,
+      onNavMasterToggle: () => this.setState({ masterMenuOpen: !S.masterMenuOpen }),
+      onNavSheet: () => this.setState({ view: 'sheet', masterMenuOpen: false, modal: null, csv: null }),
+      onNavShipList: () => this.setState({ view: 'shiplist', masterMenuOpen: false, modal: null, csv: null }),
+      navSheetStyle: navBtnStyle(S.view === 'sheet'),
+      navShipListStyle: navBtnStyle(S.view === 'shiplist'),
+      navMasterStyle: navBtnStyle(S.view === 'master'),
+      onGotoMRetailers: () => this.setState({ view: 'master', mtab: 'retailers', masterMenuOpen: false }),
+      onGotoMStores: () => this.setState({ view: 'master', mtab: 'stores', masterMenuOpen: false }),
+      onGotoMProducts: () => this.setState({ view: 'master', mtab: 'products', masterMenuOpen: false }),
+      masterItemStyle1: masterItemStyle(S.view === 'master' && S.mtab === 'retailers'),
+      masterItemStyle2: masterItemStyle(S.view === 'master' && S.mtab === 'stores'),
+      masterItemStyle3: masterItemStyle(S.view === 'master' && S.mtab === 'products'),
+      crumbItems,
+      retailerSel: r.id,
+      retailerOpts: S.retailers.map(x => ({ v: x.id, t: x.name })),
+      onRetailerSel: e => this.setState({ retailerId: e.target.value, sheetIdx: 0, modal: null, csv: null }, () => this.persist()),
+      vSheet: S.view === 'sheet', vShipList: S.view === 'shiplist', vMaster: S.view === 'master',
+      vRetailers: S.view === 'master' && S.mtab === 'retailers',
+      vStores: S.view === 'master' && S.mtab === 'stores',
+      vProducts: S.view === 'master' && S.mtab === 'products',
+      vCats: false,
+      onMRetailers: () => this.setState({ mtab: 'retailers' }),
+      onMStores: () => this.setState({ mtab: 'stores' }),
+      onMProducts: () => this.setState({ mtab: 'products' }),
+      mRetailersTabStyle: tabStyle(S.mtab === 'retailers'),
+      mStoresTabStyle: tabStyle(S.mtab === 'stores'),
+      mProductsTabStyle: tabStyle(S.mtab === 'products'),
+      // 黒丸表
+      sheetOpts, sheetSel: String(si),
+      sheetCountLabel: sheets.length + '表',
+      onSheetSel: e => this.setState({ sheetIdx: Number(e.target.value), modal: null, csv: null }),
+      onNewSheet: () => this.setState({ modal: 'newsheet', ns: { name: '', mode: 'dup', tplId: '' } }),
+      onDupSheet: () => this.upD(d => {
+        const copy = this.clone(d.sheets[si]);
+        copy.id = 'S' + Date.now(); copy.name = d.sheets[si].name + '（複製）';
+        d.sheets.push(copy);
+        this.setState({ sheetIdx: d.sheets.length - 1 });
+      }),
+      onDelSheet: () => {
+        if (sheets.length <= 1) { alert('最後の1枚は削除できません'); return; }
+        if (!confirm('「' + sheet.name + '」を削除しますか？')) return;
+        this.upD(d => { d.sheets.splice(si, 1); });
+        this.setState({ sheetIdx: 0 });
+      },
+      onOpenProducts: () => this.setState({ modal: 'products' }),
+      onOpenShelf: () => this.setState({ modal: 'shelf' }),
+      onOpenDelivery: () => this.setState({ modal: 'delivery' }),
+      onGoShipList: () => this.setState({ view: 'shiplist' }),
+      onOpenStoresCsv: () => this.openCsv('stores'),
+      onOpenProductsCsv: () => this.openCsv('products'),
+      summaryLine: (cats.map(c => c.name).join('・') || '商品未選択') + ' ' + colProds.length + '商品 ・ ' + storesSorted.length + '店中 ' + unitSet + '店 設定済',
+      noCats: cats.length === 0, hasCats: cats.length > 0,
+      hasUnitCol, storeColSpan, storeColSpanFull,
+      shelfBtnStyle: hasUnitCol ? 'padding:6px 14px;border:1px solid #c9c5bc;background:#fff;color:#333;border-radius:4px;font-size:12.5px;cursor:pointer' : 'padding:6px 14px;border:1px solid #e4e1d9;background:#f4f3ef;color:#aaa;border-radius:4px;font-size:12.5px;cursor:pointer',
+      unitOpts: [...(sheet.unitOptions || [])].sort((a, b) => a - b).map(v => ({ v: String(v), t: v + '本' })),
+      headerProds, catShelf, headerDetailOpen,
+      headerSummary: (cats.map(c => c.name).join('・') || '商品未選択') + ' ' + headerProds.length + '商品',
+      headerDetailLabel: headerDetailOpen ? '詳細を閉じる' : '詳細（CD・JAN・期限・棚割り）',
+      onToggleHeaderDetail: () => this.setState({ detail: Object.assign({}, S.detail, { __all__: !S.detail.__all__ }) }),
+      colCats, colProds, totals, grandTotal: String(grandTotal), gridRows,
+      // 発送リスト
+      shRetailerName: r.name,
+      shDenymd: ship.denymd || '', onShDenymd: e => upShip('denymd', e.target.value),
+      shDatc: ship.datc || '2', onShDatc: e => upShip('datc', e.target.value),
+      shGyono: ship.gyono || '1', onShGyono: e => upShip('gyono', e.target.value),
+      shTokcd: ship.tokcd || '', onShTokcd: e => upShip('tokcd', e.target.value),
+      shEvent: ship.event || '販促POP', onShEvent: e => upShip('event', e.target.value),
+      shMknm: ship.mknm || '', onShMknm: e => upShip('mknm', e.target.value),
+      shFixedLine: 'MKCD ' + (r.mkcd || '999') + ' ・ 得意先名 ' + (r.toknm || r.name) + ' ・ ' + (r.zip || '〒未設定') + ' ' + (r.tel || 'TEL未設定') + ' ・ ' + (r.addr || '住所未設定'),
+      onGoRetailerMaster: e => { e.preventDefault(); this.setState({ view: 'master', mtab: 'retailers' }); },
+      shRowCount: String(shipRows.length),
+      shHasRows: shipRows.length > 0, shNoRows: shipRows.length === 0,
+      shHead, shRows,
+      csvColItems,
+      csvColsOpen: !!S.csvColsOpen,
+      csvColsToggleIcon: S.csvColsOpen ? '▾' : '▸',
+      csvColsSummary: activeKeys.length + ' / ' + csvCols.length + ' 項目を出力',
+      onCsvColsToggleOpen: () => this.setState({ csvColsOpen: !S.csvColsOpen }),
+      onCsvColsReset: () => this.upR(r.id, { csvCols: Component.DEFAULT_CSV_COLS() }),
+      onCsvColAdd: () => {
+        let n = 1; let key = '新規項目';
+        while (csvCols.some(c => c.key === key)) { n++; key = '新規項目' + n; }
+        this.upR(r.id, { csvCols: csvCols.concat([{ key, on: true, custom: true }]) });
+      },
+      onShExport: exportCsv,
+      onShExportXlsx: exportXlsx,
+      shExportStyle: 'padding:8px 22px;border-radius:4px;font-size:13px;font-weight:600;' + (canExport ? 'border:none;background:#1e6a41;color:#fff;cursor:pointer' : 'border:1px solid #ddd9d0;background:#f4f3ef;color:#ccc;cursor:not-allowed'),
+      shExportXlsxStyle: 'padding:8px 22px;border-radius:4px;font-size:13px;font-weight:600;' + (canExport ? 'border:1px solid #1e6a41;background:#fff;color:#1e6a41;cursor:pointer' : 'border:1px solid #ddd9d0;background:#f4f3ef;color:#ccc;cursor:not-allowed'),
+      // マスタ
+      retailerRows,
+      nrVal: S.nr,
+      onNr: e => this.setState({ nr: e.target.value }),
+      onNrAdd: () => {
+        const v = this.state.nr.trim();
+        if (!v) { alert('小売店名を入力してください'); return; }
+        if (this.state.retailers.some(x => x.name === v)) { alert('同名の小売店が既にあります'); return; }
+        const id = 'R' + Date.now();
+        this.up(s => {
+          const data = this.clone(s.data);
+          data[id] = { masters: { stores: [], categories: [], products: [] }, sheets: [{ id: 'S' + Date.now(), name: '黒丸表A', unitOptions: [4, 5, 6, 7, 8], cats: [], delivery: {}, units: {}, manual: {} }] };
+          return {
+            retailers: [...s.retailers, { id, name: v, toknm: v, dept: '', mkcd: '999', zip: '', tel: '', fax: '', addr: '', ship: { datc: '2', denymd: '', gyono: '1', tokcd: '', event: '販促POP', mknm: '' }, csvCols: Component.DEFAULT_CSV_COLS() }],
+            data, nr: '', retailerId: id, sheetIdx: 0, view: 'master', mtab: 'retailers'
+          };
+        });
+      },
+      storeRows, productRows, catRows, catOpts,
+      sSearch: S.storeSearch, sSearchActive: !!sSearchQ, storeShownCount: String(storeRows.length),
+      onSSearch: e => this.setState({ storeSearch: e.target.value }),
+      onSSearchClear: () => this.setState({ storeSearch: '' }),
+      pSearch: S.productSearch, pSearchActive: !!pSearchQ, productShownCount: String(productRows.length),
+      onPSearch: e => this.setState({ productSearch: e.target.value }),
+      onPSearchClear: () => this.setState({ productSearch: '' }),
+      nfCode: S.nf.code, nfName: S.nf.name, nfZip: S.nf.zip, nfAddr: S.nf.addr, nfTel: S.nf.tel,
+      onNfCode: e => this.setState({ nf: Object.assign({}, S.nf, { code: e.target.value }) }),
+      onNfName: e => this.setState({ nf: Object.assign({}, S.nf, { name: e.target.value }) }),
+      onNfZip: e => this.setState({ nf: Object.assign({}, S.nf, { zip: e.target.value }) }),
+      onNfAddr: e => this.setState({ nf: Object.assign({}, S.nf, { addr: e.target.value }) }),
+      onNfTel: e => this.setState({ nf: Object.assign({}, S.nf, { tel: e.target.value }) }),
+      onNfAdd: () => {
+        const nf = this.state.nf;
+        if (!nf.code.trim() || !nf.name.trim()) { alert('店番と店舗名称は必須です'); return; }
+        if (M.stores.some(x => x.code === nf.code.trim())) { alert('店番 ' + nf.code + ' は既に登録されています'); return; }
+        this.upD(d => {
+          d.masters.stores.push({ code: nf.code.trim(), name: nf.name.trim(), zip: nf.zip, addr: nf.addr, tel: nf.tel, fax: '', haicd: '0', dept: '', area: '', bl: '' });
+        });
+        this.setState({ nf: { code: '', name: '', zip: '', addr: '', tel: '' } });
+      },
+      storeCount: String(storesSorted.length),
+      productCount: String(M.products.length),
+      pfId: S.pf.id, pfName: S.pf.name, pfCat: S.pf.cat || (catOpts[0] ? catOpts[0].name : ''), pfMaker: S.pf.maker, pfJan: S.pf.jan,
+      onPfId: e => this.setState({ pf: Object.assign({}, S.pf, { id: e.target.value }) }),
+      onPfName: e => this.setState({ pf: Object.assign({}, S.pf, { name: e.target.value }) }),
+      onPfCat: e => this.setState({ pf: Object.assign({}, S.pf, { cat: e.target.value }) }),
+      onPfMaker: e => this.setState({ pf: Object.assign({}, S.pf, { maker: e.target.value }) }),
+      onPfJan: e => this.setState({ pf: Object.assign({}, S.pf, { jan: e.target.value }) }),
+      onPfAdd: () => {
+        const pf = this.state.pf;
+        if (!pf.id || !pf.name) { alert('商品コードと商品名は必須です'); return; }
+        if (M.products.some(p => p.id === pf.id)) { alert('商品コード ' + pf.id + ' は既に登録されています'); return; }
+        const cat = pf.cat || (M.categories[0] ? M.categories[0].name : '未分類');
+        this.upD(d => {
+          if (!d.masters.categories.some(c => c.name === cat)) d.masters.categories.push({ name: cat });
+          d.masters.products.push({ id: pf.id, name: pf.name, cat, maker: pf.maker, jan: pf.jan });
+        });
+        this.setState({ pf: { id: '', name: '', cat, maker: '', jan: '' } });
+      },
+      ncVal: S.nc,
+      onNc: e => this.setState({ nc: e.target.value }),
+      onNcAdd: () => {
+        const v = this.state.nc.trim();
+        if (!v) return;
+        if (M.categories.some(c => c.name === v)) { alert('同名のカテゴリが既にあります'); return; }
+        this.upD(d => { d.masters.categories.push({ name: v }); });
+        this.setState({ nc: '' });
+      },
+      // モーダル
+      mProducts: S.modal === 'products', mShelf: S.modal === 'shelf', mDelivery: S.modal === 'delivery', mCsv: S.modal === 'csv', mNewSheet: S.modal === 'newsheet', mUnitImg: S.modal === 'unitimg',
+      closeModal: () => this.setState({ modal: null, csv: null, unitImgFile: null, unitImgPreviewUrl: '' }),
+      stopProp: e => e.stopPropagation(),
+      numGuard: e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); },
+      pmCats, shelfCats, dmCats,
+      uiStoreLabel: S.unitImgStore ? S.unitImgStore.name : '',
+      uiFileName: S.unitImgFile ? S.unitImgFile.name : '画像を選択',
+      uiHasPreview: !!S.unitImgPreviewUrl,
+      uiPreviewEl: S.unitImgPreviewUrl ? React.createElement('img', { src: S.unitImgPreviewUrl, style: { maxWidth: '100%', maxHeight: '160px', border: '1px solid #ddd9d0', borderRadius: '4px', objectFit: 'contain' } }) : null,
+      uiOnFile: e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (file.size > 2097152) { alert('ファイルサイズが大きすぎます（最大 2MB）'); return; }
+        const reader = new FileReader();
+        reader.onload = () => this.setState({ unitImgFile: file, unitImgPreviewUrl: reader.result });
+        reader.readAsDataURL(file);
+      },
+      uiOnSave: () => {
+        const uis = S.unitImgStore;
+        if (!uis || !S.unitImgFile || !S.unitImgPreviewUrl) { alert('画像を選択してください'); return; }
+        const key = sheet.id + ':' + uis.cat + ':count:' + uis.count;
+        this.setState({ shelfImages: Object.assign({}, S.shelfImages, { [key]: S.unitImgPreviewUrl }), modal: null, unitImgFile: null, unitImgPreviewUrl: '' }, () => this.persist());
+      },
+      uiSaveStyle: S.unitImgFile && S.unitImgPreviewUrl ? 'padding:7px 18px;border:none;background:#1e6a41;color:#fff;border-radius:4px;font-size:12.5px;cursor:pointer;font-weight:600' : 'padding:7px 18px;border:1px solid #ddd9d0;background:#f0efe9;color:#aaa;border-radius:4px;font-size:12.5px;cursor:not-allowed;font-weight:600',
+      cmTitle: csv ? csv.title : '', cmNote: csv ? csv.note : '',
+      cmFileName: csv ? csv.fileName : '',
+      cmHead: csv ? csv.head.map(t => ({ t })) : [],
+      cmRows: csv ? csv.rows : [],
+      cmErrors: csv ? csv.errors : [],
+      cmHasErrors: !!(csv && csv.errors.length),
+      cmHasRows: !!(csv && csv.rows.length),
+      cmOkCount: String(okCount), cmNgCount: String(ngCount),
+      cmOnFile: e => { const file = e.target.files && e.target.files[0]; if (file) this.readCsvFile(file, rows => this.processCsv(rows, file.name)); },
+      cmOnApply: () => { if (canApply) this.applyCsv(); },
+      cmApplyStyle: 'padding:7px 18px;border-radius:4px;font-size:12.5px;font-weight:600;' + (canApply ? 'border:none;background:#1e6a41;color:#fff;cursor:pointer' : 'border:1px solid #ddd9d0;background:#f0efe9;color:#aaa;cursor:not-allowed'),
+      cmApplyLabel: canApply ? '取り込む（' + okCount + '件）' : '取り込む',
+      cmOnTemplate: () => this.csvTemplate(),
+      nsName: S.ns.name,
+      onNsName: e => this.setState({ ns: Object.assign({}, S.ns, { name: e.target.value }) }),
+      onNsModeDup: () => this.setState({ ns: Object.assign({}, S.ns, { mode: 'dup' }) }),
+      onNsModeBlank: () => this.setState({ ns: Object.assign({}, S.ns, { mode: 'blank' }) }),
+      nsDupStyle: 'flex:1;padding:9px 10px;border-radius:4px;font-size:12px;cursor:pointer;' + (S.ns.mode === 'dup' ? 'border:2px solid #1e6a41;background:#f4f7f3;color:#1e5232;font-weight:700' : 'border:1px solid #ddd9d0;background:#fff;color:#666'),
+      nsBlankStyle: 'flex:1;padding:9px 10px;border-radius:4px;font-size:12px;cursor:pointer;' + (S.ns.mode === 'blank' ? 'border:2px solid #1e6a41;background:#f4f7f3;color:#1e5232;font-weight:700' : 'border:1px solid #ddd9d0;background:#fff;color:#666'),
+      onNsCreate: () => {
+        const ns = this.state.ns;
+        const name = ns.name.trim() || ('黒丸表' + String.fromCharCode(65 + sheets.length));
+        if (ns.mode === 'template' && !ns.tplId) { alert('使用するテンプレートを選んでください'); return; }
+        this.upD(d => {
+          let sheetNew;
+          if (ns.mode === 'dup') { sheetNew = this.clone(d.sheets[si]); sheetNew.name = name; }
+          else if (ns.mode === 'template') {
+            const tpl = (d.templates || []).find(t => t.id === ns.tplId);
+            if (!tpl) return;
+            sheetNew = this.clone(tpl.sheet); sheetNew.name = name;
+          }
+          else sheetNew = { cats: [], delivery: {}, units: {}, manual: {}, name: name, unitOptions: [4, 5, 6, 7, 8] };
+          sheetNew.id = 'S' + Date.now();
+          d.sheets.push(sheetNew);
+          this.setState({ sheetIdx: d.sheets.length - 1, modal: ns.mode === 'blank' ? 'products' : null });
+        });
+      },
+      // テンプレート
+      onSaveTemplate: () => {
+        const def = (sheet.name || '黒丸表') + ' テンプレート';
+        const nm = window.prompt('テンプレート名を入力してください（配送情報の日付は引き継がれません）', def);
+        if (nm === null) return;
+        const name = nm.trim() || def;
+        this.upD(d => {
+          if (!d.templates) d.templates = [];
+          const tplSheet = this.clone(d.sheets[si]);
+          delete tplSheet.id;
+          // 配送情報の日付はテンプレに残さない
+          Object.values(tplSheet.delivery || {}).forEach(rec => { rec.deadline = ''; rec.arrival = ''; rec.rounder = ''; });
+          d.templates.push({ id: 'T' + Date.now(), name, sheet: tplSheet });
+        });
+        alert('テンプレート「' + name + '」を保存しました。新規作成時に選べます。');
+      },
+      nsTplOpts: (D.templates || []).map(t => ({ v: t.id, t: t.name })),
+      nsHasTpl: (D.templates || []).length > 0,
+      nsTplId: S.ns.tplId || '',
+      onNsTpl: e => this.setState({ ns: Object.assign({}, S.ns, { tplId: e.target.value }) }),
+      onNsModeTpl: () => this.setState({ ns: Object.assign({}, S.ns, { mode: 'template' }) }),
+      nsTplStyle: 'flex:1;padding:9px 10px;border-radius:4px;font-size:12px;cursor:pointer;' + (S.ns.mode === 'template' ? 'border:2px solid #1e6a41;background:#f4f7f3;color:#1e5232;font-weight:700' : 'border:1px solid #ddd9d0;background:#fff;color:#666'),
+      nsModeTpl: S.ns.mode === 'template',
+      nsNoTpl: (D.templates || []).length === 0,
+      nsTplManageRows: (D.templates || []).map(t => ({
+        name: t.name,
+        onDel: () => { if (!confirm('テンプレート「' + t.name + '」を削除しますか？')) return; this.upD(d => { d.templates = (d.templates || []).filter(x => x.id !== t.id); }); }
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

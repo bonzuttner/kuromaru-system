@@ -1,0 +1,24 @@
+name = "kuromaru-backend"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# --- D1 database -----------------------------------------------------------
+# Created with: npm run db:create
+# Paste the returned database_id below before deploying / running `wrangler dev`.
+[[d1_databases]]
+binding = "DB"
+database_name = "kuromaru_db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# --- R2 bucket (shelf images / product thumbnails) --------------------------
+# Created with: wrangler r2 bucket create kuromaru-images
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "kuromaru-images"
+
+[vars]
+# Comma-separated list of allowed origins for CORS, or "*" for any.
+# Set this to your Cloudflare Pages URL(s) once deployed, e.g.
+# "https://kuromaru-system.pages.dev,https://your-custom-domain.example"
+ALLOWED_ORIGIN = "*"

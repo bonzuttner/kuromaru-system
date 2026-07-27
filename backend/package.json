@@ -1,0 +1,24 @@
+{
+  "name": "kuromaru-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "db:create": "wrangler d1 create kuromaru_db",
+    "db:migrate:local": "wrangler d1 migrations apply kuromaru_db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply kuromaru_db --remote",
+    "db:seed:local": "wrangler d1 execute kuromaru_db --local --file=./migrations/0002_seed.sql",
+    "db:seed:remote": "wrangler d1 execute kuromaru_db --remote --file=./migrations/0002_seed.sql"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.90.0"
+  }
+}
