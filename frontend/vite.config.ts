@@ -8,5 +8,6 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: 'dist/kuromaru',
   }
+
 }))
 
