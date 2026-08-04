@@ -12,6 +12,9 @@ function AppShell() {
   if (retailersLoading) {
     return <CenteredMessage text="読み込み中…" />;
   }
+  if (error && !retailer) {
+    return <CenteredMessage text={'通信エラー: ' + error + '。バックエンド起動後にブラウザを再読み込みしてください。'} />;
+  }
   if (!retailer) {
     return <CenteredMessage text="小売店がありません。バックエンドのシードデータを確認してください。" />;
   }

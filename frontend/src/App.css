@@ -14,9 +14,10 @@ button, input, select { font-family: inherit; }
 .sticky-head th { position: sticky; top: 0; z-index: 6; }
 .sticky-cat th { position: sticky; top: 0; z-index: 7; }
 .sticky-col th { position: sticky; top: 26px; z-index: 6; }
+.sticky-total th { position: sticky; top: 52px; z-index: 6; }
 .tbl-scroll { overflow: auto; max-height: calc(100vh - 220px); }
 .fxh { position: sticky; }
-.sticky-cat th.fxh, .sticky-col th.fxh { z-index: 9; }
+.sticky-cat th.fxh, .sticky-col th.fxh, .sticky-total th.fxh { z-index: 9; }
 td.fxb { position: sticky; z-index: 5; }
 .k1 { left: 0; }
 .k2 { left: 36px; }
@@ -32,3 +33,14 @@ td.fxb { position: sticky; z-index: 5; }
 .w5 { width: 75px; min-width: 75px; max-width: 75px; }
 .w6 { width: 52px; min-width: 52px; max-width: 52px; }
 .hc-lbl { position: sticky; left: 0; z-index: 3; background: #faf9f6; }
+.grid-total-cell {
+  min-width: 36px;
+  border-bottom: 1px solid #ddd9d0;
+  background: #faf9f6;
+  padding: 2px 4px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #777;
+}

@@ -15,16 +15,37 @@ export function GridTable({ vm }: { vm: ReturnType<typeof useSheetViewModel> }) 
               ))}
             </tr>
             <tr className="sticky-col">
-              <th className="fxh k1 w1" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '5px 6px', fontSize: 11, color: '#777', textAlign: 'center' }}>対象</th>
-              <th className="fxh k2 w2" style={{ borderBottom: '1px solid #ddd9d0', padding: '5px 14px', fontSize: 11, color: '#777', textAlign: 'left', whiteSpace: 'nowrap', backgroundColor: '#FAF9F6' }}>店番</th>
-              <th className="fxh k3 w3" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', textAlign: 'left', whiteSpace: 'nowrap' }}>店舗名称</th>
+              <th className="fxh k1 w1" style={{ background: '#faf9f6', padding: '5px 6px', fontSize: 11, color: '#777', textAlign: 'center' }}>対象</th>
+              <th className="fxh k2 w2" style={{ padding: '5px 14px', fontSize: 11, color: '#777', textAlign: 'left', whiteSpace: 'nowrap', backgroundColor: '#FAF9F6' }}>店番</th>
+              <th className="fxh k3 w3" style={{ background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', textAlign: 'left', whiteSpace: 'nowrap' }}>店舗名称</th>
               {vm.hasUnitCol && (
-                <th className="fxh k4 w4" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', whiteSpace: 'nowrap' }}>単位</th>
+                <th className="fxh k4 w4" style={{ background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', whiteSpace: 'nowrap' }}>単位</th>
               )}
-              <th className="fxh k5 w5" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', whiteSpace: 'nowrap' }}>展開本数</th>
-              <th className="fxh k6 w6 kedge" style={{ borderBottom: '1px solid #ddd9d0', padding: '5px 6px', fontSize: 11, color: '#777', textAlign: 'center', left: 377, backgroundColor: '#FAF9F6' }}>合計</th>
+              <th className="fxh k5 w5" style={{ background: '#faf9f6', padding: '5px 10px', fontSize: 11, color: '#777', whiteSpace: 'nowrap' }}>展開本数</th>
+              <th className="fxh k6 w6 kedge" style={{ padding: '5px 6px', fontSize: 11, color: '#777', textAlign: 'center', left: 377, backgroundColor: '#FAF9F6' }}>合計</th>
               {vm.colProds.map((cp, i) => (
-                <th key={i} title={cp.name} style={{ borderBottom: '1px solid #ddd9d0', borderLeft: cp.bl, background: cp.bg, padding: '5px 4px', fontSize: 12.5, minWidth: 36, color: '#555' }}>{cp.no}</th>
+                <th key={i} title={cp.name} style={{ borderLeft: cp.bl, background: cp.bg, padding: '5px 4px', fontSize: 12.5, minWidth: 36, color: '#555' }}>{cp.no}</th>
+              ))}
+            </tr>
+            <tr className="sticky-total">
+              <th className="fxh k1 w1" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '2px 6px' }} />
+              <th className="fxh k2 w2" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '2px 6px' }} />
+              <th className="fxh k3 w3" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '2px 6px' }} />
+              {vm.hasUnitCol && (
+                <th className="fxh k4 w4" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '2px 6px' }} />
+              )}
+              <th className="fxh k5 w5" style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '2px 6px' }} />
+              <th className="fxh k6 w6 kedge grid-total-cell" style={{ left: 377 }}>{vm.grandTotal}</th>
+              {vm.totals.map((tt, i) => (
+                <th
+                  key={i}
+                  className="grid-total-cell"
+                  onMouseEnter={tt.onMouseEnter}
+                  onMouseLeave={tt.onMouseLeave}
+                  style={{ borderLeft: tt.bl, background: tt.bg }}
+                >
+                  {tt.v}
+                </th>
               ))}
             </tr>
           </thead>
@@ -76,14 +97,6 @@ export function GridTable({ vm }: { vm: ReturnType<typeof useSheetViewModel> }) 
                 ))}
               </tr>
             ))}
-            <tr>
-              <td className="fxb k1 w1" style={{ background: '#faf9f6', padding: '5px 6px' }} />
-              <td colSpan={vm.storeColSpan} className="fxb" style={{ padding: '5px 14px', fontSize: 11, textAlign: 'right', fontWeight: 600, color: '#999', left: 36, backgroundColor: '#FAF9F6' }}>送付店舗 計</td>
-              <td className="fxb k6 w6 kedge" style={{ padding: '5px 6px', textAlign: 'center', fontWeight: 600, color: '#999999', backgroundColor: '#FAF9F6' }}>{vm.grandTotal}</td>
-              {vm.totals.map((tt, i) => (
-                <td key={i} style={{ background: '#faf9f6', borderLeft: tt.bl, padding: '5px 4px', textAlign: 'center', fontWeight: 700, color: '#1e5232' }}>{tt.v}</td>
-              ))}
-            </tr>
           </tbody>
         </table>
       </div>

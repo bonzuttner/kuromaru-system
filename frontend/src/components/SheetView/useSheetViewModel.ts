@@ -23,6 +23,14 @@ export function useSheetViewModel() {
     const manual = sheet.manual || {};
     const hv = ui.hoverCell;
 
+    const setHover = (ri: number, ci: number) => {
+      const cur = ui.hoverCell;
+      if (!cur || cur.ri !== ri || cur.ci !== ci) setUi({ hoverCell: { ri, ci } });
+    };
+    const clearHover = () => {
+      if (ui.hoverCell) setUi({ hoverCell: null });
+    };
+
     const colCats = cats.map((c) => ({ name: c.name, n: c.productIds.length }));
     const hvCol = hv ? hv.ci : -1;
     let cpIdx = -1;
@@ -38,11 +46,19 @@ export function useSheetViewModel() {
         };
       })
     );
+    let totalIdx = -1;
     const totals = cats.flatMap((c) =>
-      c.productIds.map((pid, i) => ({
-        v: String(cntFor(sheet, M, c, pid)),
-        bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f0eee8',
-      }))
+      c.productIds.map((pid, i) => {
+        totalIdx++;
+        const ci = totalIdx;
+        return {
+          v: String(cntFor(sheet, M, c, pid)),
+          bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f0eee8',
+          bg: ci === hvCol ? '#dbe9db' : '#faf9f6',
+          onMouseEnter: () => setHover(-1, ci),
+          onMouseLeave: clearHover,
+        };
+      })
     );
     const grandTotal = totals.reduce((a, t) => a + Number(t.v), 0);
 
@@ -55,14 +71,6 @@ export function useSheetViewModel() {
       cats.forEach((c) => c.productIds.forEach((_pid, i) => { k++; if (i === 0) firstCols[k] = true; }));
     }
     const catDivOf = (ci: number) => (firstCols[ci] ? 'border-left:2px solid #cfcabd;' : '');
-
-    const setHover = (ri: number, ci: number) => {
-      const cur = ui.hoverCell;
-      if (!cur || cur.ri !== ri || cur.ci !== ci) setUi({ hoverCell: { ri, ci } });
-    };
-    const clearHover = () => {
-      if (ui.hoverCell) setUi({ hoverCell: null });
-    };
 
     const gridRows = stores.map((st, ri) => {
       const u = hasUnitCol ? sheet.units[st.code] : undefined;
