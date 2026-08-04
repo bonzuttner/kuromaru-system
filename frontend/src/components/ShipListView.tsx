@@ -1,11 +1,138 @@
+import { useEffect, useRef, useState } from 'react';
 import { css } from '../lib/styleString';
 import { useShipListViewModel } from './useShipListViewModel';
 
 const labelStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: '#777', fontFamily: 'ui-monospace,Consolas,monospace' };
 const inputStyle = (w: number): React.CSSProperties => ({ width: w, fontSize: 12.5, padding: '5px 8px', border: '1px solid #ddd9d0', borderRadius: 4 });
+const csvKeyInputStyle: React.CSSProperties = {
+  fontFamily: 'ui-monospace,Consolas,monospace',
+  fontSize: 11.5,
+  width: 78,
+  flexShrink: 0,
+  border: '1px solid #e4e1d9',
+  borderRadius: 3,
+  padding: '2px 4px',
+  background: '#fff',
+};
+
+type CsvColItem = ReturnType<typeof useShipListViewModel>['csvColItems'][number];
+type CsvColDisplayItem = Pick<CsvColItem, 'key' | 'on' | 'placeholder' | 'source' | 'dragHandleStyle'> &
+  Partial<Pick<CsvColItem, 'onToggle' | 'onKeyChange' | 'onDel'>>;
+type CsvDragState = {
+  index: number;
+  pointerY: number;
+  offsetY: number;
+  left: number;
+  width: number;
+  height: number;
+  item: CsvColDisplayItem;
+};
+
+function CsvColRowContents({
+  item,
+  handleCursor,
+  onHandlePointerDown,
+}: {
+  item: CsvColDisplayItem;
+  handleCursor: 'grab' | 'grabbing';
+  onHandlePointerDown?: (e: React.PointerEvent<HTMLElement>) => void;
+}) {
+  return (
+    <>
+      <span
+        onPointerDown={onHandlePointerDown}
+        title="ドラッグして並び替え"
+        style={{ ...css(item.dragHandleStyle), color: handleCursor === 'grabbing' ? '#1e6a41' : undefined, cursor: handleCursor }}
+      >
+        ⋮⋮
+      </span>
+      <input type="checkbox" checked={item.on} onChange={item.onToggle} readOnly={!item.onToggle} style={{ cursor: item.onToggle ? 'pointer' : 'default' }} />
+      <input
+        value={item.key}
+        placeholder={item.placeholder}
+        onChange={(e) => item.onKeyChange?.(e.target.value)}
+        readOnly={!item.onKeyChange}
+        style={csvKeyInputStyle}
+      />
+      <span style={{ fontSize: 11.5, color: '#999', width: 150, flexShrink: 0 }}>{item.source}</span>
+      {item.onDel ? (
+        <button onClick={item.onDel} style={{ border: 'none', background: 'transparent', color: '#a88', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', marginLeft: 4 }}>削除</button>
+      ) : (
+        <span style={{ color: '#a88', fontSize: 11, marginLeft: 4 }}>削除</span>
+      )}
+    </>
+  );
+}
 
 export function ShipListView() {
   const vm = useShipListViewModel();
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const moveCsvColRef = useRef(vm.onCsvColMove);
+  const [csvDrag, setCsvDrag] = useState<CsvDragState | null>(null);
+  const isCsvDragging = csvDrag !== null;
+
+  moveCsvColRef.current = vm.onCsvColMove;
+  rowRefs.current.length = vm.csvColItems.length;
+
+  useEffect(() => {
+    if (!isCsvDragging) return;
+    const prevUserSelect = document.body.style.userSelect;
+    document.body.style.userSelect = 'none';
+
+    const onMove = (e: PointerEvent) => {
+      e.preventDefault();
+      setCsvDrag((prev) => {
+        if (!prev) return prev;
+        let target = prev.index;
+        for (let i = 0; i < rowRefs.current.length; i++) {
+          const row = rowRefs.current[i];
+          if (!row) continue;
+          const rect = row.getBoundingClientRect();
+          if (e.clientY < rect.top + rect.height / 2) {
+            target = i;
+            break;
+          }
+          target = i;
+        }
+        if (target !== prev.index) moveCsvColRef.current(prev.index, target);
+        return { ...prev, index: target, pointerY: e.clientY };
+      });
+    };
+    const onUp = () => setCsvDrag(null);
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    return () => {
+      document.body.style.userSelect = prevUserSelect;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+  }, [isCsvDragging]);
+
+  const startCsvDrag = (i: number, e: React.PointerEvent<HTMLElement>) => {
+    const row = rowRefs.current[i];
+    if (!row) return;
+    const item = vm.csvColItems[i];
+    const rect = row.getBoundingClientRect();
+    e.preventDefault();
+    setCsvDrag({
+      index: i,
+      pointerY: e.clientY,
+      offsetY: e.clientY - rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      item: {
+        key: item.key,
+        on: item.on,
+        placeholder: item.placeholder,
+        source: item.source,
+        dragHandleStyle: item.dragHandleStyle,
+      },
+    });
+  };
 
   return (
     <div style={{ padding: '16px 20px 56px', maxWidth: 1240 }}>
@@ -51,22 +178,53 @@ export function ShipListView() {
         {vm.csvColsOpen && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '10px 0 8px' }}>
-              <span style={{ fontSize: 10.5, color: '#999' }}>↑↓で並び替え・チェックで出力有無</span>
+              <span style={{ fontSize: 10.5, color: '#999' }}>ドラッグで並び替え・チェックで出力有無</span>
               <div style={{ flex: 1 }} />
               <button onClick={vm.onCsvColsReset} style={{ border: 'none', background: 'transparent', color: '#888', fontSize: 11, cursor: 'pointer', textDecoration: 'underline' }}>既定順に戻す</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 3, maxHeight: 360, overflowY: 'auto', border: '1px solid #eceae3', borderRadius: 6, padding: 4 }}>
               {vm.csvColItems.map((cc, i) => (
-                <div key={i} style={css(cc.style)}>
-                  <input type="checkbox" checked={cc.on} onChange={cc.onToggle} style={{ cursor: 'pointer' }} />
-                  <input value={cc.key} onChange={(e) => cc.onKeyChange(e.target.value)} style={{ fontFamily: 'ui-monospace,Consolas,monospace', fontSize: 11.5, width: 78, flexShrink: 0, border: '1px solid #e4e1d9', borderRadius: 3, padding: '2px 4px', background: '#fff' }} />
-                  <span style={{ fontSize: 11.5, color: '#999', width: 150, flexShrink: 0 }}>{cc.source}</span>
-                  <button onClick={cc.onUp} disabled={cc.isFirst} style={css(cc.upStyle)}>▲</button>
-                  <button onClick={cc.onDown} disabled={cc.isLast} style={css(cc.downStyle)}>▼</button>
-                  <button onClick={cc.onDel} style={{ border: 'none', background: 'transparent', color: '#a88', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', marginLeft: 4 }}>削除</button>
+                <div
+                  key={i}
+                  ref={(el) => { rowRefs.current[i] = el; }}
+                  style={{
+                    ...css(cc.style),
+                    ...(csvDrag?.index === i
+                      ? { opacity: 0.18, background: '#eef4ec', boxShadow: 'inset 0 0 0 1px #d4e3d4' }
+                      : {}),
+                  }}
+                >
+                  <CsvColRowContents
+                    item={cc}
+                    handleCursor={csvDrag?.index === i ? 'grabbing' : 'grab'}
+                    onHandlePointerDown={(e) => startCsvDrag(i, e)}
+                  />
                 </div>
               ))}
             </div>
+            {csvDrag && (
+              <div
+                style={{
+                  position: 'fixed',
+                  left: csvDrag.left,
+                  top: csvDrag.pointerY - csvDrag.offsetY,
+                  width: csvDrag.width,
+                  height: csvDrag.height,
+                  zIndex: 1000,
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '5px 8px',
+                  borderRadius: 4,
+                  background: '#fff',
+                  boxShadow: '0 12px 28px rgba(0,0,0,.22)',
+                  transform: 'scale(1.01)',
+                }}
+              >
+                <CsvColRowContents item={csvDrag.item} handleCursor="grabbing" />
+              </div>
+            )}
             <button onClick={vm.onCsvColAdd} style={{ marginTop: 8, padding: '5px 14px', border: '1px dashed #b0aca2', background: '#faf9f6', color: '#777', borderRadius: 4, fontSize: 11.5, cursor: 'pointer' }}>＋ 出力項目を追加（空欄固定）</button>
           </>
         )}

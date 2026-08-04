@@ -10,8 +10,8 @@ export const CSV_IMPORT_DEFS: Record<CsvImportType, { title: string; note: strin
   },
   stores: {
     title: '店舗マスタ CSV取込',
-    note: '形式: 店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード1,部署名,エリア,BL名 — 店番をキーに既存は上書き、新規は追加します（FAX以降は省略可）。',
-    head: ['店番', '店舗名称', '郵便番号', '住所', '電話番号', 'FAX', '配送先コード1', '部署名', 'エリア', 'BL名'],
+    note: '形式: 店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード2,部署名,エリア,BL名 — 店番をキーに既存は上書き、新規は追加します（FAX以降は省略可）。',
+    head: ['店番', '店舗名称', '郵便番号', '住所', '電話番号', 'FAX', '配送先コード2', '部署名', 'エリア', 'BL名'],
   },
   products: {
     title: '商品マスタ CSV取込',
@@ -108,7 +108,7 @@ export function csvTemplateFor(type: CsvImportType, masters: Masters, sheet: She
     return { name: '単位設定_雛形.csv', text: lines.join('\n') };
   }
   if (type === 'stores') {
-    const lines = ['店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード1,部署名,エリア,BL名'];
+    const lines = ['店番,店舗名称,郵便番号,住所,電話番号,FAX,配送先コード2,部署名,エリア,BL名'];
     masters.stores.forEach((s) => lines.push([s.code, s.name, s.zip, s.addr, s.tel, s.fax || '', s.haicd || '0', s.dept || '', s.area || '', s.bl || ''].join(',')));
     return { name: '店舗マスタ_雛形.csv', text: lines.join('\n') };
   }

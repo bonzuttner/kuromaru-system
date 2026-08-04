@@ -93,7 +93,7 @@ export function StoresTab() {
           <table style={{ borderCollapse: 'collapse', fontSize: 12, width: '100%' }}>
             <thead>
               <tr className="sticky-head">
-                {['店番', '店舗名称（HAINM）', '郵便番号（HAPOST）', '住所（HAIADD1）', '電話番号（HATEL）', 'FAX（HAFAX・任意）', '配送先コード1（HAICD_1）', '部署名（HAIBNM・任意）', 'エリア', 'BL名', ''].map((h) => (
+                {['店番', '店舗名称（HAINM）', '郵便番号（HAPOST）', '住所（HAIADD1）', '電話番号（HATEL）', 'FAX（HAFAX・任意）', '配送先コード2（HAICD_2）', '部署名（HAIBNM・任意）', 'エリア', 'BL名', ''].map((h) => (
                   <th key={h} style={{ borderBottom: '1px solid #ddd9d0', background: '#faf9f6', padding: '6px 10px', fontSize: 11, color: '#777', whiteSpace: 'nowrap', textAlign: h === '店舗名称（HAINM）' || h === '住所（HAIADD1）' || h === 'エリア' || h === 'BL名' ? 'left' : undefined }}>{h}</th>
                 ))}
               </tr>
@@ -122,7 +122,7 @@ export function StoresTab() {
           </table>
         </div>
       </div>
-      <div style={{ fontSize: 11, color: '#888', margin: '8px 0 0' }}>店舗名称は帳簿CSVの配送先名（HAINM）にそのまま出力されます（例: サツドラめむろ店）。配送先コード1の既定は 0。店番は重複しないようにしてください。</div>
+      <div style={{ fontSize: 11, color: '#888', margin: '8px 0 0' }}>店舗名称は帳簿CSVの配送先名（HAINM）にそのまま出力されます（例: サツドラめむろ店）。配送先コード2の既定は 0。店番は重複しないようにしてください。</div>
     </div>
   );
 }

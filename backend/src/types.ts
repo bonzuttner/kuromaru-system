@@ -11,6 +11,8 @@ export interface CsvCol {
   key: string;
   on: boolean;
   custom?: boolean;
+  placeholderKey?: string;
+  sourceKey?: string;
 }
 
 export interface RetailerRow {
@@ -115,7 +117,7 @@ export const DEFAULT_CSV_COLS: CsvCol[] = [
   'TKADD1', 'TKADD2', 'TKADD3', 'HAICD_1', 'HAICD_2', 'HAINM', 'HAIBNM', 'HAPOST', 'HATEL', 'HAFAX',
   'HAIADD1', 'HAIADD2', 'HAIADD3', 'SYOCD1', 'SYOCD2', 'SYONM', 'JAN', 'ITF', 'IRISU', 'PRICE',
   'GENKA', 'SKSU', 'SYUYMD', 'MKNM', 'CR'
-].map((key) => ({ key, on: true }));
+].map((key) => ({ key, on: true, placeholderKey: key, sourceKey: key }));
 
 export interface Env {
   DB: D1Database;
