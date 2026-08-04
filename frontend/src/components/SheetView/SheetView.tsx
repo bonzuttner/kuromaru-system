@@ -9,15 +9,47 @@ export function SheetView() {
     <div style={{ padding: '16px 20px 56px', maxWidth: 1240 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
         <span style={{ fontSize: 12, color: '#888' }}>黒丸表</span>
-        <select
-          value={String(vm.si)}
-          onChange={(e) => vm.onSheetSel(Number(e.target.value))}
-          style={{ fontSize: 13, fontWeight: 600, padding: '7px 10px', border: '1px solid #c9c5bc', borderRadius: 6, background: '#fff', color: '#1e5232', maxWidth: 340 }}
-        >
-          {vm.sheetOpts.map((o) => (
-            <option key={o.v} value={o.v}>{o.t}</option>
-          ))}
-        </select>
+        {!vm.isRenaming ? (
+          <>
+            <select
+              value={String(vm.si)}
+              onChange={(e) => vm.onSheetSel(Number(e.target.value))}
+              style={{ fontSize: 13, fontWeight: 600, padding: '7px 10px', border: '1px solid #c9c5bc', borderRadius: 6, background: '#fff', color: '#1e5232', maxWidth: 340 }}
+            >
+              {vm.sheetOpts.map((o) => (
+                <option key={o.v} value={o.v}>{o.t}</option>
+              ))}
+            </select>
+            <button
+              onClick={vm.onStartRename}
+              style={{ padding: '6px 12px', border: '1px solid #c9c5bc', background: '#fff', color: '#555', fontSize: 12, cursor: 'pointer', borderRadius: 6 }}
+            >
+              名称変更
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              value={vm.renameValue}
+              onChange={(e) => vm.onRenameChange(e.target.value)}
+              onKeyDown={vm.onRenameKeyDown}
+              autoFocus
+              style={{ fontSize: 13, fontWeight: 600, padding: '7px 10px', border: '1px solid #c9c5bc', borderRadius: 6, background: '#fff', color: '#1e5232', maxWidth: 340 }}
+            />
+            <button
+              onClick={vm.onRenameSave}
+              style={{ padding: '6px 12px', border: '1px solid #1e6a41', background: '#1e6a41', color: '#fff', fontSize: 12, cursor: 'pointer', borderRadius: 6, fontWeight: 600 }}
+            >
+              保存
+            </button>
+            <button
+              onClick={vm.onRenameCancel}
+              style={{ padding: '6px 12px', border: '1px solid #c9c5bc', background: '#fff', color: '#555', fontSize: 12, cursor: 'pointer', borderRadius: 6 }}
+            >
+              キャンセル
+            </button>
+          </>
+        )}
         <span style={{ fontSize: 11.5, color: '#bbb' }}>{vm.sheetCountLabel}</span>
         <div style={{ flex: 1 }} />
         <button onClick={vm.onNewSheet} style={{ padding: '7px 14px', border: '1px solid #1e6a41', background: '#fff', color: '#1e6a41', fontSize: 12, cursor: 'pointer', borderRadius: 6, fontWeight: 600 }}>＋ 新規作成</button>

@@ -44,6 +44,8 @@ export interface UiState {
   unitImgStore: UnitImgTarget | null;
   unitImgFile: File | null;
   unitImgPreviewUrl: string;
+  renamingSheet: boolean;
+  renameValue: string;
 }
 
 export function initialUiState(): UiState {
@@ -69,5 +71,7 @@ export function initialUiState(): UiState {
     unitImgStore: null,
     unitImgFile: null,
     unitImgPreviewUrl: '',
+    renamingSheet: false,
+    renameValue: '',
   };
 }

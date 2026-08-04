@@ -210,7 +210,56 @@ export function useSheetViewModel() {
       sheetCountLabel: sheets.length + '表',
       unitOpts: [...(sheet.unitOptions || [])].sort((a, b) => a - b).map((v) => ({ v: String(v), t: v + '本' })),
 
+      isRenaming: ui.renamingSheet,
+      renameValue: ui.renameValue,
+
       onSheetSel: (idx: number) => setUi({ sheetIdx: idx, modal: null, csv: null }),
+      onStartRename: () => {
+        setUi({ renamingSheet: true, renameValue: sheet.name });
+      },
+      onRenameChange: (value: string) => {
+        setUi({ renameValue: value });
+      },
+      onRenameKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const trimmed = ui.renameValue.trim();
+          if (!trimmed) {
+            alert('シート名を入力してください');
+            return;
+          }
+          const isDuplicate = sheets.some((sh, i) => i !== si && sh.name === trimmed);
+          if (isDuplicate) {
+            alert('同名のシートが既にあります');
+            return;
+          }
+          updateData((d) => {
+            d.sheets[si].name = trimmed;
+          });
+          setUi({ renamingSheet: false, renameValue: '' });
+        } else if (e.key === 'Escape') {
+          setUi({ renamingSheet: false, renameValue: '' });
+        }
+      },
+      onRenameSave: () => {
+        const trimmed = ui.renameValue.trim();
+        if (!trimmed) {
+          alert('シート名を入力してください');
+          return;
+        }
+        const isDuplicate = sheets.some((sh, i) => i !== si && sh.name === trimmed);
+        if (isDuplicate) {
+          alert('同名のシートが既にあります');
+          return;
+        }
+        updateData((d) => {
+          d.sheets[si].name = trimmed;
+        });
+        setUi({ renamingSheet: false, renameValue: '' });
+      },
+      onRenameCancel: () => {
+        setUi({ renamingSheet: false, renameValue: '' });
+      },
       onNewSheet: () => setUi({ modal: 'newsheet', ns: { name: '', mode: 'dup', tplId: '' } }),
       onDupSheet: () => {
         const newIdx = sheets.length;
@@ -248,5 +297,5 @@ export function useSheetViewModel() {
         alert('テンプレート「' + name + '」を保存しました。新規作成時に選べます。');
       },
     };
-  }, [retailer, data, ui.sheetIdx, ui.hoverCell, ui.detailAll, setUi, updateData]);
+  }, [retailer, data, ui.sheetIdx, ui.hoverCell, ui.detailAll, ui.renamingSheet, ui.renameValue, setUi, updateData]);
 }
