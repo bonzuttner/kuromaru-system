@@ -1,8 +1,24 @@
+import { useState } from 'react';
 import { useStore } from '../../state/store';
 import type { useSheetViewModel } from './useSheetViewModel';
 
+type HeaderProd = ReturnType<typeof useSheetViewModel>['headerProds'][number];
+type EditableDeliveryField = 'cd' | 'jan' | 'deadline' | 'arrival' | 'rounder' | 'band' | 'note';
+
+const headerInputStyle = (w: number, mono?: boolean): React.CSSProperties => ({
+  width: w,
+  fontSize: 11,
+  padding: '2px 4px',
+  border: '1px solid #ddd9d0',
+  borderRadius: 3,
+  textAlign: 'center',
+  background: '#fffdf2',
+  fontFamily: mono ? 'ui-monospace,Consolas,monospace' : undefined,
+});
+
 export function ProductHeaderTable({ vm }: { vm: ReturnType<typeof useSheetViewModel> }) {
   const { setUi } = useStore();
+  const [editingCell, setEditingCell] = useState<string | null>(null);
 
   return (
     <div style={{ border: '1px solid #ddd9d0', background: '#fff', borderRadius: 6, marginBottom: 12, overflow: 'hidden' }}>
@@ -48,18 +64,29 @@ export function ProductHeaderTable({ vm }: { vm: ReturnType<typeof useSheetViewM
             <tr>
               <td className="hc-lbl kedge" style={{ padding: '5px 14px', color: '#777', fontSize: 11, whiteSpace: 'nowrap', background: '#faf9f6', fontWeight: 700 }}>店舗着</td>
               {vm.headerProds.map((c, i) => (
-                <td key={i} style={{ borderLeft: c.bl, padding: '5px 8px', textAlign: 'center', fontSize: 11 }}>{c.arrival}</td>
+                <td key={i} style={{ borderLeft: c.bl, padding: '4px 6px', textAlign: 'center', fontSize: 11 }}>
+                  <InlineEditableField
+                    prod={c}
+                    field="arrival"
+                    width={86}
+                    mono
+                    placeholder="YYYY/MM/DD"
+                    editingCell={editingCell}
+                    setEditingCell={setEditingCell}
+                  />
+                </td>
               ))}
             </tr>
           </tbody>
           {vm.headerDetailOpen && (
             <tbody style={{ borderTop: '1px solid #eceae3' }}>
-              <DetailRow label="CD" prods={vm.headerProds} field="cd" mono />
-              <DetailRow label="JAN" prods={vm.headerProds} field="jan" mono />
-              <DetailRow label="入稿期限" prods={vm.headerProds} field="deadline" />
-              <DetailRow label="ラウンダー" prods={vm.headerProds} field="rounder" />
-              <DetailRow label="帯 / 同梱" prods={vm.headerProds} field="band" shaded />
-              <DetailRow label="備考" prods={vm.headerProds} field="note" shaded muted />
+              <DetailInputRow label="CD" prods={vm.headerProds} field="cd" width={76} mono editingCell={editingCell} setEditingCell={setEditingCell} />
+              <DetailInputRow label="JAN" prods={vm.headerProds} field="jan" width={112} mono editingCell={editingCell} setEditingCell={setEditingCell} />
+              <DetailInputRow label="入稿期限" prods={vm.headerProds} field="deadline" width={86} mono placeholder="YYYY/MM/DD" editingCell={editingCell} setEditingCell={setEditingCell} />
+              <DetailInputRow label="ラウンダー" prods={vm.headerProds} field="rounder" width={86} editingCell={editingCell} setEditingCell={setEditingCell} />
+              <DetailInputRow label="帯" prods={vm.headerProds} field="band" width={76} shaded editingCell={editingCell} setEditingCell={setEditingCell} />
+              <DoukonRow prods={vm.headerProds} shaded />
+              <DetailInputRow label="備考" prods={vm.headerProds} field="note" width={150} shaded editingCell={editingCell} setEditingCell={setEditingCell} />
             </tbody>
           )}
         </table>
@@ -106,15 +133,18 @@ export function ProductHeaderTable({ vm }: { vm: ReturnType<typeof useSheetViewM
 
 const rowLabelStyle = { borderBottom: '1px solid #f0eee8', padding: '5px 14px', color: '#777777', fontSize: 11, whiteSpace: 'nowrap' as const, fontWeight: 700 };
 
-function DetailRow({
-  label, prods, field, mono, shaded, muted,
+function DetailInputRow({
+  label, prods, field, width, mono, shaded, placeholder, editingCell, setEditingCell,
 }: {
   label: string;
-  prods: ReturnType<typeof useSheetViewModel>['headerProds'];
-  field: 'cd' | 'jan' | 'deadline' | 'rounder' | 'band' | 'note';
+  prods: HeaderProd[];
+  field: EditableDeliveryField;
+  width: number;
   mono?: boolean;
   shaded?: boolean;
-  muted?: boolean;
+  placeholder?: string;
+  editingCell: string | null;
+  setEditingCell: (key: string | null) => void;
 }) {
   return (
     <tr>
@@ -126,12 +156,114 @@ function DetailRow({
             borderBottom: shaded ? undefined : '1px solid #f0eee8',
             borderLeft: c.bl, padding: '5px 8px', textAlign: 'center',
             fontFamily: mono ? 'ui-monospace,Consolas,monospace' : undefined,
-            fontSize: 11, color: muted ? '#555' : undefined,
+            fontSize: 11,
           }}
         >
-          {c[field]}
+          <InlineEditableField
+            prod={c}
+            field={field}
+            width={width}
+            mono={mono}
+            placeholder={field === 'jan' ? c.janPlaceholder : placeholder}
+            editingCell={editingCell}
+            setEditingCell={setEditingCell}
+          />
         </td>
       ))}
     </tr>
+  );
+}
+
+function DoukonRow({ prods, shaded }: { prods: HeaderProd[]; shaded?: boolean }) {
+  return (
+    <tr>
+      <td className="hc-lbl kedge" style={shaded ? { padding: '5px 14px', color: '#777777', fontSize: 11, whiteSpace: 'nowrap', background: '#faf9f6', fontWeight: 700 } : rowLabelStyle}>同梱</td>
+      {prods.map((c, i) => (
+        <td
+          key={i}
+          style={{
+            borderBottom: shaded ? undefined : '1px solid #f0eee8',
+            borderLeft: c.bl,
+            padding: '5px 8px',
+            textAlign: 'center',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => c.onDeliveryChange('doukon', c.doukon === '○' ? '×' : '○')}
+            style={{ border: 'none', background: 'transparent', color: c.doukon ? '#555' : '#aaa', fontSize: 11, padding: 0, cursor: 'pointer' }}
+          >
+            {c.doukon || '—'}
+          </button>
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function InlineEditableField({
+  prod,
+  field,
+  width,
+  mono,
+  placeholder,
+  editingCell,
+  setEditingCell,
+}: {
+  prod: HeaderProd;
+  field: EditableDeliveryField;
+  width: number;
+  mono?: boolean;
+  placeholder?: string;
+  editingCell: string | null;
+  setEditingCell: (key: string | null) => void;
+}) {
+  const key = prod.pid + ':' + field;
+  const editing = editingCell === key;
+  const displayValue = prod[field] || (field === 'jan' ? prod.janPlaceholder : '');
+  const text = displayValue || '—';
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={prod[field]}
+        onChange={(e) => prod.onDeliveryChange(field, e.target.value)}
+        onBlur={() => setEditingCell(null)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === 'Escape') {
+            e.currentTarget.blur();
+          }
+        }}
+        placeholder={placeholder}
+        style={headerInputStyle(width, mono)}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditingCell(key)}
+      style={{
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        margin: 0,
+        minWidth: Math.min(width, 86),
+        maxWidth: Math.max(width, 86),
+        color: displayValue ? '#555' : '#aaa',
+        fontSize: 11,
+        fontFamily: mono ? 'ui-monospace,Consolas,monospace' : undefined,
+        textAlign: 'center',
+        cursor: 'text',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+      title={displayValue || placeholder || ''}
+    >
+      {text}
+    </button>
   );
 }

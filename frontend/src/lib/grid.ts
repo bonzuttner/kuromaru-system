@@ -9,6 +9,19 @@ export function storesSorted(masters: Masters): Store[] {
   return [...masters.stores].sort((a, b) => a.code.localeCompare(b.code));
 }
 
+export function storesForSheet(masters: Masters, sheet: Pick<Sheet, 'storeOrder'> | undefined): Store[] {
+  const sorted = storesSorted(masters);
+  const byCode = new Map(sorted.map((st) => [st.code, st]));
+  const ordered: Store[] = [];
+  (sheet?.storeOrder || []).forEach((code) => {
+    const st = byCode.get(code);
+    if (!st) return;
+    ordered.push(st);
+    byCode.delete(code);
+  });
+  return ordered.concat(sorted.filter((st) => byCode.has(st.code)));
+}
+
 // Products marked to ship for a given category at a given unit count `u`.
 export function prodsForUnit(c: SheetCat, u: number | undefined): string[] {
   if (c.useShelf === false) return [];
@@ -54,8 +67,8 @@ export interface ShipRow {
 
 export function buildShipRows(masters: Masters, sheets: Sheet[]): ShipRow[] {
   const rows: ShipRow[] = [];
-  const stores = storesSorted(masters);
   sheets.forEach((sh) => {
+    const stores = storesForSheet(masters, sh);
     sh.cats.forEach((c) => {
       c.productIds.forEach((pid, pi) => {
         const p = pById(masters, pid);
@@ -71,7 +84,7 @@ export function buildShipRows(masters: Masters, sheets: Sheet[]): ShipRow[] {
             ok = !!(mrow && mrow.marks && mrow.marks[pid]);
           }
           if (!ok) return;
-          rows.push({ st, p, circ: CIRC[pi], cat: c.name, sheetName: sh.name, arrival: dl.arrival || '', jan: p.jan || dl.jan || '' });
+          rows.push({ st, p, circ: CIRC[pi], cat: c.name, sheetName: sh.name, arrival: dl.arrival || '', jan: dl.jan || p.jan || '' });
         });
       });
     });

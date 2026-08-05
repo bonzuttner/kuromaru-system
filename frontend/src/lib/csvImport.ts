@@ -1,4 +1,5 @@
 import type { Masters, RetailerData, Sheet } from '../types';
+import { storesForSheet } from './grid';
 
 export type CsvImportType = 'units' | 'stores' | 'products';
 
@@ -100,7 +101,7 @@ export function applyCsvImport(type: CsvImportType, d: RetailerData, sheetIdx: n
 export function csvTemplateFor(type: CsvImportType, masters: Masters, sheet: Sheet | undefined): { name: string; text: string } {
   if (type === 'units') {
     const lines = ['店舗コード,店舗名称,4本,5本,6本,7本,8本'];
-    [...masters.stores].sort((a, b) => a.code.localeCompare(b.code)).forEach((st) => {
+    storesForSheet(masters, sheet).forEach((st) => {
       const u = sheet?.units[st.code];
       const flags = [4, 5, 6, 7, 8].map((x) => (u === x ? '1' : ''));
       lines.push([st.code, st.name, ...flags].join(','));

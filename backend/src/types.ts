@@ -88,6 +88,7 @@ export interface Sheet {
   units: Record<string, number>;
   manual?: Record<string, ManualRow>;
   hiddenStores?: Record<string, boolean>;
+  storeOrder?: string[];
 }
 
 export interface Template {

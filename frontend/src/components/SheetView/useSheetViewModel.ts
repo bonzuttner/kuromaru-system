@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { useStore } from '../../state/store';
 import { CIRC } from '../../types';
-import type { Sheet, SheetCat, Store } from '../../types';
-import { cell, cntFor, markedManual, pById, storesSorted } from '../../lib/grid';
+import type { DeliveryInfo, Sheet, SheetCat, Store } from '../../types';
+import { cell, cntFor, markedManual, pById, storesForSheet, storesSorted } from '../../lib/grid';
 
 const zebra = (i: number) => (i % 2 ? 'background:#fbfaf7;' : 'background:#fff;');
+const sameOrder = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i]);
 
 export function useSheetViewModel() {
   const { retailer, data, ui, setUi, updateData } = useStore();
@@ -17,7 +18,10 @@ export function useSheetViewModel() {
     const si = Math.max(0, Math.min(ui.sheetIdx, sheets.length - 1));
     const sheet: Sheet =
       sheets[si] || { id: 'X', name: '', cats: [], delivery: {}, units: {}, unitOptions: [4, 5, 6, 7, 8] };
-    const stores: Store[] = storesSorted(M);
+    const stores: Store[] = storesForSheet(M, sheet);
+    const ascStoreCodes = storesSorted(M).map((st) => st.code);
+    const descStoreCodes = [...ascStoreCodes].reverse();
+    const currentStoreCodes = stores.map((st) => st.code);
     const hidden = sheet.hiddenStores || {};
     const cats = sheet.cats;
     const manual = sheet.manual || {};
@@ -71,6 +75,27 @@ export function useSheetViewModel() {
       cats.forEach((c) => c.productIds.forEach((_pid, i) => { k++; if (i === 0) firstCols[k] = true; }));
     }
     const catDivOf = (ci: number) => (firstCols[ci] ? 'border-left:2px solid #cfcabd;' : '');
+
+    const onStoreRowMove = (from: number, to: number) => {
+      if (from === to) return;
+      const next = currentStoreCodes.slice();
+      const [code] = next.splice(from, 1);
+      if (!code) return;
+      next.splice(to, 0, code);
+      updateData((d) => {
+        d.sheets[si].storeOrder = next;
+      });
+    };
+    const sortStoresByCode = (dir: 'asc' | 'desc') => {
+      updateData((d) => {
+        d.sheets[si].storeOrder = dir === 'asc' ? ascStoreCodes : descStoreCodes;
+      });
+    };
+    const setDeliveryField = (pid: string, key: keyof DeliveryInfo, value: string) =>
+      updateData((d) => {
+        const rec = d.sheets[si].delivery[pid] || (d.sheets[si].delivery[pid] = {});
+        rec[key] = value;
+      });
 
     const gridRows = stores.map((st, ri) => {
       const u = hasUnitCol ? sheet.units[st.code] : undefined;
@@ -164,8 +189,9 @@ export function useSheetViewModel() {
     });
 
     const headerProds: {
-      no: string; name: string; cd: string; jan: string; cnt: string; deadline: string; arrival: string;
-      rounder: string; band: string; note: string; bl: string; thumbUrl: string;
+      pid: string; no: string; name: string; cd: string; jan: string; janPlaceholder: string; cnt: string; deadline: string; arrival: string;
+      rounder: string; band: string; doukon: string; note: string; bl: string; thumbUrl: string;
+      onDeliveryChange: (key: keyof DeliveryInfo, value: string) => void;
     }[] = [];
     cats.forEach((c) => {
       c.productIds.forEach((pid, i) => {
@@ -173,10 +199,11 @@ export function useSheetViewModel() {
         const d = sheet.delivery[pid] || {};
         const thumbUrl = D.productThumbs[pid] || '';
         headerProds.push({
-          no: CIRC[i], name: p.name, cd: d.cd || '—', jan: p.jan || d.jan || '—', cnt: cntFor(sheet, M, c, pid) + '店',
-          deadline: d.deadline || '—', arrival: d.arrival || '—', rounder: d.rounder || '—',
-          band: (d.band || '—') + ' / 販促' + (d.doukon || '—'), note: d.note || '—',
+          pid, no: CIRC[i], name: p.name, cd: d.cd || '', jan: d.jan || '', janPlaceholder: p.jan || '', cnt: cntFor(sheet, M, c, pid) + '店',
+          deadline: d.deadline || '', arrival: d.arrival || '', rounder: d.rounder || '',
+          band: d.band || '', doukon: d.doukon || '', note: d.note || '',
           bl: i === 0 ? '2px solid #cfcabd' : '1px solid #f7f5f0', thumbUrl,
+          onDeliveryChange: (key, value) => setDeliveryField(pid, key, value),
         });
       });
     });
@@ -214,6 +241,10 @@ export function useSheetViewModel() {
       retailer: r, sheets, si, sheet, cats, gridRows, colCats, colProds, totals, grandTotal,
       hasUnitCol, storeColSpan, storeColSpanFull, noCats, hasCats, summaryLine, headerSummary, headerDetailOpen,
       headerProds, catShelf,
+      onStoreRowMove,
+      onSortStoresAsc: () => sortStoresByCode('asc'),
+      onSortStoresDesc: () => sortStoresByCode('desc'),
+      storeSortDir: sameOrder(currentStoreCodes, ascStoreCodes) ? 'asc' : sameOrder(currentStoreCodes, descStoreCodes) ? 'desc' : null,
       sheetOpts: sheets.map((sh, i) => ({ v: String(i), t: sh.name })),
       sheetCountLabel: sheets.length + '表',
       unitOpts: [...(sheet.unitOptions || [])].sort((a, b) => a - b).map((v) => ({ v: String(v), t: v + '本' })),
